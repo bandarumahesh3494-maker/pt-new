@@ -68,11 +68,14 @@ INSERT INTO app_config (realm_id, config_key, config_value) VALUES
     {"value": "check", "label": "✓"}
   ]'::jsonb),
   ('00000000-0000-0000-0000-000000000001', 'row_colors', '{
-    "planned": "#fbdd2b",
-    "actual": "#1f3cd1",
-    "plannedOpacity": 0.2,
-    "actualOpacity": 0.2,
-    "subSubtaskOpacity": 0.15
+    "planned": "#3b82f6",
+    "actual": "#10b981",
+    "subtask": "#8b5cf6",
+    "subSubtask": "#f59e0b",
+    "plannedOpacity": 0.15,
+    "actualOpacity": 0.15,
+    "subtaskOpacity": 0.12,
+    "subSubtaskOpacity": 0.1
   }'::jsonb),
   ('00000000-0000-0000-0000-000000000001', 'category_colors', '{
     "dev": "#10b981",

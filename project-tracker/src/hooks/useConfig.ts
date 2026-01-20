@@ -10,8 +10,11 @@ interface MilestoneOption {
 interface RowColors {
   planned: string;
   actual: string;
+  subtask: string;
+  subSubtask: string;
   plannedOpacity: number;
   actualOpacity: number;
+  subtaskOpacity: number;
   subSubtaskOpacity: number;
 }
 
@@ -45,11 +48,14 @@ export const useConfig = () => {
   const [milestoneOptions, setMilestoneOptions] = useState<MilestoneOption[]>(DEFAULT_MILESTONE_OPTIONS);
 
   const [rowColors, setRowColors] = useState<RowColors>({
-    planned: '#fbdd2b',
-    actual: '#1f3cd1',
-    plannedOpacity: 0.2,
-    actualOpacity: 0.2,
-    subSubtaskOpacity: 0.15
+    planned: '#3b82f6',
+    actual: '#10b981',
+    subtask: '#8b5cf6',
+    subSubtask: '#f59e0b',
+    plannedOpacity: 0.15,
+    actualOpacity: 0.15,
+    subtaskOpacity: 0.12,
+    subSubtaskOpacity: 0.1
   });
 
   const [categoryColors, setCategoryColors] = useState<CategoryColors>({

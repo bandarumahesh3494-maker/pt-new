@@ -16,8 +16,11 @@ interface MilestoneOption {
 interface RowColors {
   planned: string;
   actual: string;
+  subtask: string;
+  subSubtask: string;
   plannedOpacity: number;
   actualOpacity: number;
+  subtaskOpacity: number;
   subSubtaskOpacity: number;
 }
 
@@ -53,11 +56,14 @@ export const ConfigDashboard: React.FC = () => {
   // Combined list for display
   const milestoneOptions = [...DEFAULT_MILESTONE_OPTIONS, ...customMilestoneOptions];
   const [rowColors, setRowColors] = useState<RowColors>({
-    planned: '#fbdd2b',
-    actual: '#1f3cd1',
-    plannedOpacity: 0.2,
-    actualOpacity: 0.2,
-    subSubtaskOpacity: 0.15
+    planned: '#3b82f6',
+    actual: '#10b981',
+    subtask: '#8b5cf6',
+    subSubtask: '#f59e0b',
+    plannedOpacity: 0.15,
+    actualOpacity: 0.15,
+    subtaskOpacity: 0.12,
+    subSubtaskOpacity: 0.1
   });
   const [categoryColors, setCategoryColors] = useState<CategoryColors>({
     dev: '#10b981',
@@ -602,8 +608,73 @@ export const ConfigDashboard: React.FC = () => {
             </div>
 
             <div>
+              <h3 className="text-lg font-medium mb-3">Subtask Rows</h3>
+              <div className="space-y-3">
+                <div className="flex items-center gap-4">
+                  <label className="w-32 font-medium">Color:</label>
+                  <input
+                    type="color"
+                    value={rowColors.subtask}
+                    onChange={(e) => setRowColors({ ...rowColors, subtask: e.target.value })}
+                    className="w-20 h-10 rounded cursor-pointer"
+                  />
+                  <input
+                    type="text"
+                    value={rowColors.subtask}
+                    onChange={(e) => setRowColors({ ...rowColors, subtask: e.target.value })}
+                    className="w-32 bg-gray-700 border border-gray-600 text-white px-3 py-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div className="flex items-center gap-4">
+                  <label className="w-32 font-medium">Opacity:</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value={rowColors.subtaskOpacity}
+                    onChange={(e) => setRowColors({ ...rowColors, subtaskOpacity: parseFloat(e.target.value) })}
+                    className="flex-1"
+                  />
+                  <input
+                    type="number"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value={rowColors.subtaskOpacity}
+                    onChange={(e) => setRowColors({ ...rowColors, subtaskOpacity: parseFloat(e.target.value) })}
+                    className="w-20 bg-gray-700 border border-gray-600 text-white px-3 py-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div
+                  className="h-12 rounded border border-gray-600 flex items-center justify-center text-sm"
+                  style={{
+                    backgroundColor: `${rowColors.subtask}${Math.round(rowColors.subtaskOpacity * 255).toString(16).padStart(2, '0')}`
+                  }}
+                >
+                  Preview
+                </div>
+              </div>
+            </div>
+
+            <div>
               <h3 className="text-lg font-medium mb-3">Sub-Subtask Rows</h3>
               <div className="space-y-3">
+                <div className="flex items-center gap-4">
+                  <label className="w-32 font-medium">Color:</label>
+                  <input
+                    type="color"
+                    value={rowColors.subSubtask}
+                    onChange={(e) => setRowColors({ ...rowColors, subSubtask: e.target.value })}
+                    className="w-20 h-10 rounded cursor-pointer"
+                  />
+                  <input
+                    type="text"
+                    value={rowColors.subSubtask}
+                    onChange={(e) => setRowColors({ ...rowColors, subSubtask: e.target.value })}
+                    className="w-32 bg-gray-700 border border-gray-600 text-white px-3 py-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
                 <div className="flex items-center gap-4">
                   <label className="w-32 font-medium">Opacity:</label>
                   <input
@@ -625,11 +696,10 @@ export const ConfigDashboard: React.FC = () => {
                     className="w-20 bg-gray-700 border border-gray-600 text-white px-3 py-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                <div className="text-sm text-gray-400">Uses PLANNED color with this opacity</div>
                 <div
                   className="h-12 rounded border border-gray-600 flex items-center justify-center text-sm"
                   style={{
-                    backgroundColor: `${rowColors.planned}${Math.round(rowColors.subSubtaskOpacity * 255).toString(16).padStart(2, '0')}`
+                    backgroundColor: `${rowColors.subSubtask}${Math.round(rowColors.subSubtaskOpacity * 255).toString(16).padStart(2, '0')}`
                   }}
                 >
                   Preview
