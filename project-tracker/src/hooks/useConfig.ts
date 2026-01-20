@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
 
 interface MilestoneOption {
   value: string;
@@ -29,6 +30,7 @@ interface CategoryOpacity {
 }
 
 export const useConfig = () => {
+  const { userProfile } = useAuth();
   const [milestoneOptions, setMilestoneOptions] = useState<MilestoneOption[]>([
     { value: 'planned', label: 'PLANNED' },
     { value: 'in-progress', label: 'In progress' },
@@ -64,33 +66,41 @@ export const useConfig = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadConfig();
-  }, []);
+    if (userProfile?.realm_id) {
+      loadConfig();
+    }
+  }, [userProfile?.realm_id]);
 
   const loadConfig = async () => {
+    if (!userProfile?.realm_id) return;
+
     try {
       const { data: milestoneData } = await supabase
         .from('app_config')
         .select('config_value')
         .eq('config_key', 'milestone_options')
+        .eq('realm_id', userProfile.realm_id)
         .maybeSingle();
 
       const { data: colorData } = await supabase
         .from('app_config')
         .select('config_value')
         .eq('config_key', 'row_colors')
+        .eq('realm_id', userProfile.realm_id)
         .maybeSingle();
 
       const { data: categoryColorData } = await supabase
         .from('app_config')
         .select('config_value')
         .eq('config_key', 'category_colors')
+        .eq('realm_id', userProfile.realm_id)
         .maybeSingle();
 
       const { data: categoryOpacityData } = await supabase
         .from('app_config')
         .select('config_value')
         .eq('config_key', 'category_opacity')
+        .eq('realm_id', userProfile.realm_id)
         .maybeSingle();
 
       if (milestoneData) {
