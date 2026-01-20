@@ -45,6 +45,17 @@ export const Dashboard: React.FC = () => {
     return `rgba(${Math.floor(r * 0.7)}, ${Math.floor(g * 0.7)}, ${Math.floor(b * 0.7)}, 0.95)`;
   };
 
+  const getDynamicShadow = (hex: string) => {
+    if (!hex || typeof hex !== 'string') {
+      return '4px 0 6px -2px rgba(0, 0, 0, 0.5)';
+    }
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    // Create a dark shadow based on the color
+    return `4px 0 6px -2px rgba(${Math.floor(r * 0.5)}, ${Math.floor(g * 0.5)}, ${Math.floor(b * 0.5)}, 0.6)`;
+  };
+
   const [showAddTask, setShowAddTask] = useState(false);
   const [showAddPerson, setShowAddPerson] = useState(false);
   const [showAddSubtask, setShowAddSubtask] = useState<{ taskId: string; taskName: string } | null>(null);
@@ -629,19 +640,19 @@ export const Dashboard: React.FC = () => {
           <table className="w-full border-collapse">
             <thead className="sticky top-0 z-30">
               <tr className={`${colors.headerBg} backdrop-blur border-b ${colors.border}`}>
-                 <th className={`sticky left-0 z-40 ${colors.headerBg} border-2 ${colors.border} px-4 py-3 text-left font-semibold min-w-[60px] shadow-[4px_0_6px_-2px_rgba(0,0,0,0.5)]`}>
+                 <th className={`sticky left-0 z-40 ${colors.headerBg} border-2 ${colors.border} px-4 py-3 text-left font-semibold min-w-[60px]`} style={{ boxShadow: '4px 0 6px -2px rgba(0, 0, 0, 0.5)' }}>
                   ID
                 </th>
-                <th className={`sticky left-[60px] z-40 ${colors.headerBg} border-2 ${colors.border} px-4 py-3 text-left font-semibold min-w-[120px] shadow-[4px_0_6px_-2px_rgba(0,0,0,0.5)]`}>
+                <th className={`sticky left-[60px] z-40 ${colors.headerBg} border-2 ${colors.border} px-4 py-3 text-left font-semibold min-w-[120px]`} style={{ boxShadow: '4px 0 6px -2px rgba(0, 0, 0, 0.5)' }}>
                   Category
                 </th>
-                <th className={`sticky left-[180px] z-40 ${colors.headerBg} border-2 ${colors.border} px-4 py-3 text-left font-semibold min-w-[180px] shadow-[4px_0_6px_-2px_rgba(0,0,0,0.5)]`}>
+                <th className={`sticky left-[180px] z-40 ${colors.headerBg} border-2 ${colors.border} px-4 py-3 text-left font-semibold min-w-[180px]`} style={{ boxShadow: '4px 0 6px -2px rgba(0, 0, 0, 0.5)' }}>
                   Task Name
                 </th>
-                <th className={`sticky left-[412px] z-40 ${colors.headerBg} border-2 ${colors.border} px-4 py-3 text-left font-semibold min-w-[150px] shadow-[4px_0_6px_-2px_rgba(0,0,0,0.5)]`}>
+                <th className={`sticky left-[412px] z-40 ${colors.headerBg} border-2 ${colors.border} px-4 py-3 text-left font-semibold min-w-[150px]`} style={{ boxShadow: '4px 0 6px -2px rgba(0, 0, 0, 0.5)' }}>
                   Sub Task
                 </th>
-                <th className={`sticky left-[600px] z-40 ${colors.headerBg} border-2 ${colors.border} px-4 py-3 text-left font-semibold min-w-[150px] shadow-[4px_0_6px_-2px_rgba(0,0,0,0.5)]`}>
+                <th className={`sticky left-[600px] z-40 ${colors.headerBg} border-2 ${colors.border} px-4 py-3 text-left font-semibold min-w-[150px]`} style={{ boxShadow: '4px 0 6px -2px rgba(0, 0, 0, 0.5)' }}>
                   Engineer/Lead
                 </th>
                 {dateRange.map(date => (
@@ -699,9 +710,9 @@ export const Dashboard: React.FC = () => {
                     <React.Fragment key={task.id}>
                       {subtasks.length === 0 ? (
                         <tr>
-                            <td className={`sticky left-0 z-20 border-2 ${colors.border} px-4 font-semibold ${colors.textSecondary} shadow-[4px_0_6px_-2px_rgba(0,0,0,0.3)]`} style={{ backgroundColor: colors.stickyColBg }}>{index + 1}</td>
+                            <td className={`sticky left-0 z-20 border-2 ${colors.border} px-4 font-semibold ${colors.textSecondary}`} style={{ backgroundColor: colors.stickyColBg, boxShadow: '4px 0 6px -2px rgba(0, 0, 0, 0.3)' }}>{index + 1}</td>
 
-                          <td className={`sticky left-[60px] z-20 border-2 ${colors.border} px-2 py-3 ${getCategoryColor(task.category)} shadow-[4px_0_6px_-2px_rgba(0,0,0,0.5)]`}>
+                          <td className={`sticky left-[60px] z-20 border-2 ${colors.border} px-2 py-3 ${getCategoryColor(task.category)}`} style={{ boxShadow: '4px 0 6px -2px rgba(0, 0, 0, 0.5)' }}>
                             <select disabled={!canEditTask(task)}
                               value={task.category}
                               onChange={(e) => handleCategoryChange(task.id, e.target.value)}
@@ -713,7 +724,7 @@ export const Dashboard: React.FC = () => {
                               <option value="support" className={colors.bgTertiary}>SUPPORT</option>
                             </select>
                           </td>
-                          <td className={`sticky left-[180px] z-20 border-2 ${colors.border} px-4 py-3 font-medium shadow-[4px_0_6px_-2px_rgba(0,0,0,0.3)]`} style={{ backgroundColor: colors.stickyColBg }}>
+                          <td className={`sticky left-[180px] z-20 border-2 ${colors.border} px-4 py-3 font-medium`} style={{ backgroundColor: colors.stickyColBg, boxShadow: '4px 0 6px -2px rgba(0, 0, 0, 0.3)' }}>
                             <div className="flex items-center gap-2">
                               <div className="flex items-center gap-1">
                                 {[1, 2, 3].map((star) => (
@@ -751,8 +762,8 @@ export const Dashboard: React.FC = () => {
                               Add Subtask
                             </button>
                           </td>
-                          <td className={`sticky left-[412px] z-20 border-2 ${colors.border} px-4 py-3 shadow-[4px_0_6px_-2px_rgba(0,0,0,0.3)]`} style={{ backgroundColor: colors.stickyColBg }}>-</td>
-                          <td className={`sticky left-[562px] z-10 border-2 ${colors.border} px-4 py-3 shadow-[4px_0_6px_-2px_rgba(0,0,0,0.3)]`} style={{ backgroundColor: colors.stickyColBg }}>-</td>
+                          <td className={`sticky left-[412px] z-20 border-2 ${colors.border} px-4 py-3`} style={{ backgroundColor: colors.stickyColBg, boxShadow: '4px 0 6px -2px rgba(0, 0, 0, 0.3)' }}>-</td>
+                          <td className={`sticky left-[562px] z-10 border-2 ${colors.border} px-4 py-3`} style={{ backgroundColor: colors.stickyColBg, boxShadow: '4px 0 6px -2px rgba(0, 0, 0, 0.3)' }}>-</td>
                           {dateRange.map(date => (
                             <td key={date} className={`border ${colors.border} px-3 py-2 ${colors.bg}`}></td>
                           ))}
@@ -763,9 +774,9 @@ export const Dashboard: React.FC = () => {
                           {plannedSubtask && (
                             <>
                               <tr style={{ backgroundColor: hexToRgba(rowColors.planned, rowColors.plannedOpacity) }} className={colors.text}>
-                            <td rowSpan={totalRows} className={`sticky left-0 z-20 border-2 ${colors.border} px-4 shadow-[4px_0_6px_-2px_rgba(0,0,0,0.5)]`} style={{ backgroundColor: hexToRgbaDark(rowColors.planned) }}>{index + 1}</td>
+                            <td rowSpan={totalRows} className={`sticky left-0 z-20 border-2 ${colors.border} px-4`} style={{ backgroundColor: hexToRgbaDark(rowColors.planned), boxShadow: getDynamicShadow(rowColors.planned) }}>{index + 1}</td>
 
-                                <td rowSpan={totalRows} className={`sticky left-[60px] z-20 border-2 ${colors.border} px-2 py-3 ${getCategoryColor(task.category)} shadow-[4px_0_6px_-2px_rgba(0,0,0,0.5)]`}>
+                                <td rowSpan={totalRows} className={`sticky left-[60px] z-20 border-2 ${colors.border} px-2 py-3 ${getCategoryColor(task.category)}`} style={{ boxShadow: getDynamicShadow(rowColors.planned) }}>
                                   <select disabled={!canEditTask(task)}
                                     value={task.category}
                                     onChange={(e) => handleCategoryChange(task.id, e.target.value)}
@@ -777,7 +788,7 @@ export const Dashboard: React.FC = () => {
                                     <option value="support" className={colors.bgTertiary}>SUPPORT</option>
                                   </select>
                                 </td>
-                                <td rowSpan={totalRows} className={`sticky left-[180px] z-20 border-2 ${colors.border} px-4 py-3 shadow-[4px_0_6px_-2px_rgba(0,0,0,0.5)]`} style={{ backgroundColor: hexToRgbaDark(rowColors.planned) }}>
+                                <td rowSpan={totalRows} className={`sticky left-[180px] z-20 border-2 ${colors.border} px-4 py-3`} style={{ backgroundColor: hexToRgbaDark(rowColors.planned), boxShadow: getDynamicShadow(rowColors.planned) }}>
                                   <div className="font-medium flex items-center gap-2">
                                     <div className="flex items-center gap-1">
                                       {[1, 2, 3].map((star) => (
@@ -823,7 +834,7 @@ export const Dashboard: React.FC = () => {
                                     </button>
                                   )}
                                 </td>
-                                <td className="sticky left-[412px] z-20 border-2 ${colors.border} px-4 py-3 font-semibold shadow-[4px_0_6px_-2px_rgba(0,0,0,0.5)]" style={{ backgroundColor: hexToRgbaDark(rowColors.planned) }}>
+                                <td className="sticky left-[412px] z-20 border-2 ${colors.border} px-4 py-3 font-semibold" style={{ backgroundColor: hexToRgbaDark(rowColors.planned), boxShadow: getDynamicShadow(rowColors.planned) }}>
                                   <div className="flex items-center gap-2">
                                     {plannedSubtask.subSubtasks.length > 0 && (
                                       <button
@@ -853,7 +864,7 @@ export const Dashboard: React.FC = () => {
                                     Add Sub-Subtask
                                   </button>
                                 </td>
-                                <td className={`sticky ${engineerLeadPosition} z-10 border-2 ${colors.border} px-2 py-3 shadow-[4px_0_6px_-2px_rgba(0,0,0,0.5)]`} style={{ backgroundColor: hexToRgbaDark(rowColors.planned) }}>
+                                <td className={`sticky ${engineerLeadPosition} z-10 border-2 ${colors.border} px-2 py-3`} style={{ backgroundColor: hexToRgbaDark(rowColors.planned), boxShadow: getDynamicShadow(rowColors.planned) }}>
                                   <select disabled={!canEditTask(plannedSubtask.subtask)}
                                     value={plannedSubtask.subtask.assigned_to || ''}
                                     onChange={(e) => handleAssignmentChange(plannedSubtask.subtask.id, e.target.value || null)}
@@ -920,7 +931,7 @@ export const Dashboard: React.FC = () => {
                               {/* PLANNED Sub-Subtasks */}
                               {!collapsedSubtasks.has(plannedSubtask.subtask.id) && plannedSubtask.subSubtasks.map(sst => (
                                 <tr key={sst.subSubtask.id} style={{ backgroundColor: hexToRgba(rowColors.planned, rowColors.subSubtaskOpacity) }} className={colors.text}>
-                                  <td className={`sticky left-[412px] z-20 border-2 ${colors.border} px-4 py-3 pl-8 shadow-[4px_0_6px_-2px_rgba(0,0,0,0.5)]`} style={{ backgroundColor: hexToRgbaDark(rowColors.planned) }}>
+                                  <td className={`sticky left-[412px] z-20 border-2 ${colors.border} px-4 py-3 pl-8`} style={{ backgroundColor: hexToRgbaDark(rowColors.planned), boxShadow: getDynamicShadow(rowColors.planned) }}>
                                     <div className="flex items-center gap-2">
                                       <span className={colors.textSecondary}>↳</span> {sst.subSubtask.name}
                                       <button disabled={!canEditTask(sst.subSubtask)}
@@ -939,7 +950,7 @@ export const Dashboard: React.FC = () => {
                                       </button>
                                     </div>
                                   </td>
-                                  <td className={`sticky ${engineerLeadPosition} z-10 border-2 ${colors.border} px-2 py-3 shadow-[4px_0_6px_-2px_rgba(0,0,0,0.5)]`} style={{ backgroundColor: hexToRgbaDark(rowColors.planned) }}>
+                                  <td className={`sticky ${engineerLeadPosition} z-10 border-2 ${colors.border} px-2 py-3`} style={{ backgroundColor: hexToRgbaDark(rowColors.planned), boxShadow: getDynamicShadow(rowColors.planned) }}>
                                     <select disabled={!canEditTask(sst.subSubtask)}
                                       value={sst.subSubtask.assigned_to || ''}
                                       onChange={(e) => handleSubSubtaskAssignmentChange(sst.subSubtask.id, e.target.value || null)}
@@ -1011,8 +1022,8 @@ export const Dashboard: React.FC = () => {
                           <tr style={{ backgroundColor: hexToRgba(rowColors.actual, rowColors.actualOpacity) }}>
                             {!plannedSubtask && (
                               <>
-                                <td rowSpan={totalRows} className={`sticky left-0 z-20 border-2 ${colors.border} px-4 shadow-[4px_0_6px_-2px_rgba(0,0,0,0.5)]`} style={{ backgroundColor: hexToRgbaDark(rowColors.actual) }}>{index + 1}</td>
-                                <td rowSpan={totalRows} className={`sticky left-[60px] z-20 border-2 ${colors.border} px-2 py-3 ${getCategoryColor(task.category)} shadow-[4px_0_6px_-2px_rgba(0,0,0,0.5)]`}>
+                                <td rowSpan={totalRows} className={`sticky left-0 z-20 border-2 ${colors.border} px-4`} style={{ backgroundColor: hexToRgbaDark(rowColors.actual), boxShadow: getDynamicShadow(rowColors.actual) }}>{index + 1}</td>
+                                <td rowSpan={totalRows} className={`sticky left-[60px] z-20 border-2 ${colors.border} px-2 py-3 ${getCategoryColor(task.category)}`} style={{ boxShadow: getDynamicShadow(rowColors.actual) }}>
 
                                   <select disabled={!canEditTask(task)}
                                     value={task.category}
@@ -1025,7 +1036,7 @@ export const Dashboard: React.FC = () => {
                                     <option value="support" className={colors.bgTertiary}>SUPPORT</option>
                                   </select>
                                 </td>
-                                <td rowSpan={totalRows} className={`sticky left-[180px] z-20 border-2 ${colors.border} px-4 py-3 shadow-[4px_0_6px_-2px_rgba(0,0,0,0.5)]`} style={{ backgroundColor: hexToRgbaDark(rowColors.actual) }}>
+                                <td rowSpan={totalRows} className={`sticky left-[180px] z-20 border-2 ${colors.border} px-4 py-3`} style={{ backgroundColor: hexToRgbaDark(rowColors.actual), boxShadow: getDynamicShadow(rowColors.actual) }}>
                                   <div className="font-medium flex items-center gap-2">
                                     {task.name}
                                     <button disabled={!canEditTask(task)}
@@ -1061,7 +1072,7 @@ export const Dashboard: React.FC = () => {
                                 </td>
                               </>
                             )}
-                            <td className={`sticky left-[412px] z-20 border-2 ${colors.border} px-4 py-3 font-semibold shadow-[4px_0_6px_-2px_rgba(0,0,0,0.5)]`} style={{ backgroundColor: hexToRgbaDark(rowColors.actual) }}>
+                            <td className={`sticky left-[412px] z-20 border-2 ${colors.border} px-4 py-3 font-semibold`} style={{ backgroundColor: hexToRgbaDark(rowColors.actual), boxShadow: getDynamicShadow(rowColors.actual) }}>
                               <div className="flex items-center gap-2">
                                 {otherSubtasks.length > 0 && (
                                   <button
@@ -1084,7 +1095,7 @@ export const Dashboard: React.FC = () => {
                                 )}
                               </div>
                             </td>
-                            <td className={`sticky ${engineerLeadPosition} z-10 border-2 ${colors.border} px-2 py-3 ${colors.textSecondary} text-xs shadow-[4px_0_6px_-2px_rgba(0,0,0,0.5)]`} style={{ backgroundColor: hexToRgbaDark(rowColors.actual) }}>-</td>
+                            <td className={`sticky ${engineerLeadPosition} z-10 border-2 ${colors.border} px-2 py-3 ${colors.textSecondary} text-xs`} style={{ backgroundColor: hexToRgbaDark(rowColors.actual), boxShadow: getDynamicShadow(rowColors.actual) }}>-</td>
                             {dateRange.map(date => {
                               const milestoneText = actualMilestones[date];
                               return (
@@ -1103,7 +1114,7 @@ export const Dashboard: React.FC = () => {
                           {displayedSubtasks.map((st) => (
                             <React.Fragment key={st.subtask.id}>
                               <tr style={{ backgroundColor: hexToRgba(rowColors.subtask, rowColors.subtaskOpacity) }} className={`hover:${colors.bgTertiary}/50 transition-colors`}>
-                                <td className={`sticky left-[412px] z-20 border-2 ${colors.border} px-4 py-3 shadow-[4px_0_6px_-2px_rgba(0,0,0,0.5)]`} style={{ backgroundColor: hexToRgbaDark(rowColors.subtask) }}>
+                                <td className={`sticky left-[412px] z-20 border-2 ${colors.border} px-4 py-3`} style={{ backgroundColor: hexToRgbaDark(rowColors.subtask), boxShadow: getDynamicShadow(rowColors.subtask) }}>
                                   <div className="flex items-center gap-2">
                                     {st.subSubtasks.length > 0 && (
                                       <button
@@ -1147,7 +1158,7 @@ export const Dashboard: React.FC = () => {
                                     Add Sub-Subtask
                                   </button>
                                 </td>
-                                <td className={`sticky ${engineerLeadPosition} z-10 border-2 ${colors.border} px-2 py-3 shadow-[4px_0_6px_-2px_rgba(0,0,0,0.5)]`} style={{ backgroundColor: hexToRgbaDark(rowColors.subtask) }}>
+                                <td className={`sticky ${engineerLeadPosition} z-10 border-2 ${colors.border} px-2 py-3`} style={{ backgroundColor: hexToRgbaDark(rowColors.subtask), boxShadow: getDynamicShadow(rowColors.subtask) }}>
                                   <select disabled={!canEditTask(st.subtask)}
                                     value={st.subtask.assigned_to || ''}
                                     onChange={(e) => handleAssignmentChange(st.subtask.id, e.target.value || null)}
@@ -1213,7 +1224,7 @@ export const Dashboard: React.FC = () => {
                               </tr>
                               {!collapsedSubtasks.has(st.subtask.id) && st.subSubtasks.map(sst => (
                                 <tr key={sst.subSubtask.id} style={{ backgroundColor: hexToRgba(rowColors.subSubtask, rowColors.subSubtaskOpacity) }} className={`hover:${colors.bgTertiary}/50 transition-colors`}>
-                                  <td className={`sticky left-[412px] z-20 border-2 ${colors.border} px-4 py-3 pl-8 shadow-[4px_0_6px_-2px_rgba(0,0,0,0.5)]`} style={{ backgroundColor: hexToRgbaDark(rowColors.subSubtask) }}>
+                                  <td className={`sticky left-[412px] z-20 border-2 ${colors.border} px-4 py-3 pl-8`} style={{ backgroundColor: hexToRgbaDark(rowColors.subSubtask), boxShadow: getDynamicShadow(rowColors.subSubtask) }}>
                                     <div className="flex items-center gap-2">
                                       <span className={colors.textSecondary}>↳</span> {sst.subSubtask.name}
                                       <button disabled={!canEditTask(sst.subSubtask)}
@@ -1232,7 +1243,7 @@ export const Dashboard: React.FC = () => {
                                       </button>
                                     </div>
                                   </td>
-                                  <td className={`sticky ${engineerLeadPosition} z-10 border-2 ${colors.border} px-2 py-3 shadow-[4px_0_6px_-2px_rgba(0,0,0,0.5)]`} style={{ backgroundColor: hexToRgbaDark(rowColors.subSubtask) }}>
+                                  <td className={`sticky ${engineerLeadPosition} z-10 border-2 ${colors.border} px-2 py-3`} style={{ backgroundColor: hexToRgbaDark(rowColors.subSubtask), boxShadow: getDynamicShadow(rowColors.subSubtask) }}>
                                     <select disabled={!canEditTask(sst.subSubtask)}
                                       value={sst.subSubtask.assigned_to || ''}
                                       onChange={(e) => handleSubSubtaskAssignmentChange(sst.subSubtask.id, e.target.value || null)}
