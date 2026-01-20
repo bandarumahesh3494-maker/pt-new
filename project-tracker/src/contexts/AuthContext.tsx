@@ -6,18 +6,27 @@ interface UserProfile {
   id: string;
   email: string;
   full_name: string;
-  role: 'user' | 'admin';
+  role: 'user' | 'admin' | 'realm_admin' | 'owner';
   realm_id: string;
+}
+
+interface Realm {
+  id: string;
+  name: string;
+  created_at: string;
+  updated_at: string;
 }
 
 interface AuthContextType {
   user: User | null;
   userProfile: UserProfile | null;
+  currentRealm: Realm | null;
   currentRealmId: string | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, fullName: string, role: 'user' | 'admin') => Promise<void>;
   signOut: () => Promise<void>;
+  setCurrentRealm: (realm: Realm | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -48,7 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       id: '00000000-0000-0000-0000-000000000099',
       email: 'demo@example.com',
       full_name: 'Demo User',
-      role: 'realm_admin',
+      role: 'realm_admin' as 'realm_admin',
       realm_id: '00000000-0000-0000-0000-000000000001',
     };
 
@@ -140,7 +149,7 @@ console.log('Realms data loaded for user:', realmsData1);
   };
 
   return (
-    <AuthContext.Provider value={{ user, userProfile, currentRealm, loading, signIn, signUp, signOut, setCurrentRealm }}>
+    <AuthContext.Provider value={{ user, userProfile, currentRealm, currentRealmId, loading, signIn, signUp, signOut, setCurrentRealm }}>
       {children}
     </AuthContext.Provider>
   );
