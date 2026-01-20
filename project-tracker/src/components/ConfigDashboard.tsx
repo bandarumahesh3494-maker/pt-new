@@ -69,11 +69,14 @@ export const ConfigDashboard: React.FC = () => {
   const [tempUserRole, setTempUserRole] = useState('');
 
   useEffect(() => {
-    loadConfig();
-    // loadUsers();
-  }, []);
+    if (userProfile?.realm_id) {
+      loadConfig();
+    }
+  }, [userProfile?.realm_id]);
 
   const loadConfig = async () => {
+    if (!userProfile?.realm_id) return;
+
     try {
       const { data: milestoneData } = await supabase
         .from('app_config')
@@ -126,19 +129,6 @@ export const ConfigDashboard: React.FC = () => {
     }
   };
 
-  // const loadUsers = async () => {
-  //   try {
-  //     const { data, error } = await supabase
-  //       .from('users')
-  //       .select('*')
-  //       .order('email');
-
-  //     if (error) throw error;
-  //     setUsers(data || []);
-  //   } catch (err) {
-  //     console.error('Error loading users:', err);
-  //   }
-  // };
 
   const saveMilestoneOptions = async () => {
     try {
@@ -261,14 +251,14 @@ export const ConfigDashboard: React.FC = () => {
       const { error } = await supabase
         .from('users')
         .update({
-          email: fullName,
+          full_name: fullName,
           role,
           updated_at: new Date().toISOString()
         })
-        .eq('id', userId);
+        .eq('id', userId)
+        .eq('realm_id', userProfile?.realm_id);
 
       if (error) throw error;
-      await loadUsers();
       setEditingUser(null);
     } catch (err) {
       console.error('Error updating user:', err);
@@ -284,15 +274,22 @@ export const ConfigDashboard: React.FC = () => {
       await supabase
         .from('subtasks')
         .update({ assigned_to: null })
-        .eq('assigned_to', userId);
+        .eq('assigned_to', userId)
+        .eq('realm_id', userProfile?.realm_id);
+
+      await supabase
+        .from('sub_subtasks')
+        .update({ assigned_to: null })
+        .eq('assigned_to', userId)
+        .eq('realm_id', userProfile?.realm_id);
 
       const { error } = await supabase
         .from('users')
         .delete()
-        .eq('id', userId);
+        .eq('id', userId)
+        .eq('realm_id', userProfile?.realm_id);
 
       if (error) throw error;
-      await loadUsers();
     } catch (err) {
       console.error('Error deleting user:', err);
     }
@@ -425,12 +422,12 @@ export const ConfigDashboard: React.FC = () => {
                   </>
                 ) : (
                   <>
-                    <span className="flex-1">{user.email}</span>
+                    <span className="flex-1">{user.full_name || user.email}</span>
                     <span className="text-gray-400 w-40">{user.role}</span>
                     <button
                       onClick={() => {
                         setEditingUser(user.id);
-                        setTempUserName(user.email);
+                        setTempUserName(user.full_name || user.email);
                         setTempUserRole(user.role);
                       }}
                       className="text-blue-400 hover:text-blue-300"
@@ -826,7 +823,6 @@ export const ConfigDashboard: React.FC = () => {
           isOpen={true}
           onClose={() => {
             setShowAddPerson(false);
-            loadUsers();
           }}
           users={users}
         />
