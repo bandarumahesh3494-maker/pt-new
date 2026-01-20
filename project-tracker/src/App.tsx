@@ -120,86 +120,20 @@ function SettingsMenu({
 /* ================= MAIN APP ================= */
 
 function App() {
-  const [authReady, setAuthReady] = useState(false);
-  const [authFailed, setAuthFailed] = useState(false);
-
   const { colors } = useTheme();
   const { userProfile, currentRealm } = useAuth();
-  const navigate = useNavigate();
 
   const isRealmAdmin =
     userProfile?.role === 'realm_admin' ||
     userProfile?.role === 'owner' ||
     userProfile?.role === 'admin';
 
-  /* Restore session from URL tokens */
-  useEffect(() => {
-    async function restoreSession() {
-      const params = new URLSearchParams(window.location.search);
-      const access_token = params.get('access_token');
-      const refresh_token = params.get('refresh_token');
-
-      if (access_token && refresh_token) {
-        const { error } = await supabase.auth.setSession({
-          access_token,
-          refresh_token,
-        });
-
-        if (error) setAuthFailed(true);
-
-        window.history.replaceState({}, '', window.location.pathname);
-      }
-
-      setAuthReady(true);
-    }
-
-    restoreSession();
-  }, []);
-
-  /* Detect logout / expiry (multi-tab safe) */
-  useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) {
-        setAuthFailed(true);
-        navigate('/signin', { replace: true });
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
-
-  if (!authReady) {
+  if (!userProfile) {
     return (
       <div className="flex items-center justify-center min-h-screen text-white">
-        Restoring session…
+        Loading...
       </div>
     );
-  }
-
-  /* ================= SESSION EXPIRED UI ================= */
-
-  if (authFailed) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a0f1e] text-white">
-        <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold">Session expired</h1>
-          <p className="text-gray-400">
-            Please signin to continue.
-          </p>
-        {/* <p className="text-sm text-blue-400 mt-2">
-  <Link to="/signin" className="hover:underline">
-    Go to /signin
-  </Link>
-</p> */}
-        </div>
-      </div>
-    );
-  }
-
-  if (!userProfile) {
-    return null;
   }
 
   /* ================= UI ================= */

@@ -38,20 +38,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    // DEMO MODE: Set mock user and profile
+    const mockUser = {
+      id: '00000000-0000-0000-0000-000000000099',
+      email: 'demo@example.com',
+    } as User;
 
-      // console.log('Auth state changed. Current user:', user);
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session:', session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchUserProfile(session.user.id);
-      }
-    });
+    const mockProfile: UserProfile = {
+      id: '00000000-0000-0000-0000-000000000099',
+      email: 'demo@example.com',
+      full_name: 'Demo User',
+      role: 'realm_admin',
+      realm_id: '00000000-0000-0000-0000-000000000001',
+    };
 
+    const mockRealm = {
+      id: '00000000-0000-0000-0000-000000000001',
+      name: 'Demo Workspace',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    setUser(mockUser);
+    setUserProfile(mockProfile);
+    setCurrentRealm(mockRealm);
+    setCurrentRealmId(mockProfile.realm_id);
+
+    // Keep the auth state listener for when you want to use real auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       (async () => {
-        setUser(session?.user ?? null);
         if (session?.user) {
+          setUser(session.user);
           await fetchUserProfile(session.user.id);
         }
       })();
