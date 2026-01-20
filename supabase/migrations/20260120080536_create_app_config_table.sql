@@ -69,8 +69,8 @@ INSERT INTO app_config (realm_id, config_key, config_value) VALUES
   ]'::jsonb),
   ('00000000-0000-0000-0000-000000000001', 'row_colors', '{
     "planned": "#3b82f6",
-    "actual": "#10b981",
-    "subtask": "#8b5cf6",
+    "actual": "#14b8a6",
+    "subtask": "#6366f1",
     "subSubtask": "#f59e0b",
     "plannedOpacity": 0.15,
     "actualOpacity": 0.15,
@@ -78,10 +78,10 @@ INSERT INTO app_config (realm_id, config_key, config_value) VALUES
     "subSubtaskOpacity": 0.1
   }'::jsonb),
   ('00000000-0000-0000-0000-000000000001', 'category_colors', '{
-    "dev": "#10b981",
-    "test": "#3b82f6",
-    "infra": "#eab308",
-    "support": "#f97316"
+    "dev": "#06b6d4",
+    "test": "#8b5cf6",
+    "infra": "#f59e0b",
+    "support": "#ec4899"
   }'::jsonb),
   ('00000000-0000-0000-0000-000000000001', 'category_opacity', '{
     "dev": 1.0,

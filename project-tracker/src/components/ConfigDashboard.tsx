@@ -57,8 +57,8 @@ export const ConfigDashboard: React.FC = () => {
   const milestoneOptions = [...DEFAULT_MILESTONE_OPTIONS, ...customMilestoneOptions];
   const [rowColors, setRowColors] = useState<RowColors>({
     planned: '#3b82f6',
-    actual: '#10b981',
-    subtask: '#8b5cf6',
+    actual: '#14b8a6',
+    subtask: '#6366f1',
     subSubtask: '#f59e0b',
     plannedOpacity: 0.15,
     actualOpacity: 0.15,
@@ -66,10 +66,10 @@ export const ConfigDashboard: React.FC = () => {
     subSubtaskOpacity: 0.1
   });
   const [categoryColors, setCategoryColors] = useState<CategoryColors>({
-    dev: '#10b981',
-    test: '#3b82f6',
-    infra: '#eab308',
-    support: '#f97316'
+    dev: '#06b6d4',
+    test: '#8b5cf6',
+    infra: '#f59e0b',
+    support: '#ec4899'
   });
   const [categoryOpacity, setCategoryOpacity] = useState<CategoryOpacity>({
     dev: 1.0,
