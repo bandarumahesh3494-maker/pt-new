@@ -35,9 +35,23 @@ interface CategoryOpacity {
   support: number;
 }
 
+// Default milestone options shared across all realms
+const DEFAULT_MILESTONE_OPTIONS: MilestoneOption[] = [
+  { value: 'planned', label: 'PLANNED' },
+  { value: 'in-progress', label: 'In progress' },
+  { value: 'closed', label: 'CLOSED' },
+  { value: 'dev-complete', label: 'Dev Complete' },
+  { value: 'dev-merge-done', label: 'Dev Merge Done' },
+  { value: 'staging-merge-done', label: 'Staging Merge Done' },
+  { value: 'prod-merge-done', label: 'Prod Merge Done' },
+];
+
 export const ConfigDashboard: React.FC = () => {
   const { colors } = useTheme();
-  const [milestoneOptions, setMilestoneOptions] = useState<MilestoneOption[]>([]);
+  // Only store custom milestone options (realm-specific)
+  const [customMilestoneOptions, setCustomMilestoneOptions] = useState<MilestoneOption[]>([]);
+  // Combined list for display
+  const milestoneOptions = [...DEFAULT_MILESTONE_OPTIONS, ...customMilestoneOptions];
   const [rowColors, setRowColors] = useState<RowColors>({
     planned: '#fbdd2b',
     actual: '#1f3cd1',
@@ -107,7 +121,7 @@ export const ConfigDashboard: React.FC = () => {
         .maybeSingle();
 
       if (milestoneData) {
-        setMilestoneOptions(milestoneData.config_value as MilestoneOption[]);
+        setCustomMilestoneOptions(milestoneData.config_value as MilestoneOption[]);
       }
 
       if (colorData) {
@@ -137,7 +151,7 @@ export const ConfigDashboard: React.FC = () => {
         .upsert({
           realm_id: userProfile?.realm_id,
           config_key: 'milestone_options',
-          config_value: milestoneOptions,
+          config_value: customMilestoneOptions,
           updated_at: new Date().toISOString()
         }, {
           onConflict: 'realm_id,config_key'
@@ -204,8 +218,8 @@ export const ConfigDashboard: React.FC = () => {
       value: `custom-${Date.now()}`,
       label: 'New Milestone'
     };
-    const updated = [...milestoneOptions, newMilestone];
-    setMilestoneOptions(updated);
+    const updated = [...customMilestoneOptions, newMilestone];
+    setCustomMilestoneOptions(updated);
 
     try {
       const { error } = await supabase
@@ -226,14 +240,22 @@ export const ConfigDashboard: React.FC = () => {
   };
 
   const updateMilestone = (index: number, label: string) => {
-    const updated = [...milestoneOptions];
-    updated[index].label = label;
-    setMilestoneOptions(updated);
+    // Only allow updating custom milestones
+    if (index < DEFAULT_MILESTONE_OPTIONS.length) return;
+
+    const customIndex = index - DEFAULT_MILESTONE_OPTIONS.length;
+    const updated = [...customMilestoneOptions];
+    updated[customIndex].label = label;
+    setCustomMilestoneOptions(updated);
   };
 
   const deleteMilestone = async (index: number) => {
-    const updated = milestoneOptions.filter((_, i) => i !== index);
-    setMilestoneOptions(updated);
+    // Only allow deleting custom milestones
+    if (index < DEFAULT_MILESTONE_OPTIONS.length) return;
+
+    const customIndex = index - DEFAULT_MILESTONE_OPTIONS.length;
+    const updated = customMilestoneOptions.filter((_, i) => i !== customIndex);
+    setCustomMilestoneOptions(updated);
 
     try {
       const { error } = await supabase
@@ -330,55 +352,64 @@ export const ConfigDashboard: React.FC = () => {
             Milestone Options
           </h2>
           <div className="space-y-2 mb-4">
-            {milestoneOptions.map((option, index) => (
-              <div key={option.value} className={`flex items-center gap-2 p-3 ${colors.cardBg} border ${colors.border} rounded`}>
-                {editingMilestone === index ? (
-                  <>
-                    <input
-                      type="text"
-                      value={tempMilestoneLabel}
-                      onChange={(e) => setTempMilestoneLabel(e.target.value)}
-                      className="flex-1 bg-gray-700 border border-gray-600 text-white px-3 py-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      autoFocus
-                    />
-                    <button
-                      onClick={() => {
-                        updateMilestone(index, tempMilestoneLabel);
-                        saveMilestoneOptionsAndClose();
-                      }}
-                      className="text-green-400 hover:text-green-300"
-                    >
-                      <Save className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => setEditingMilestone(null)}
-                      className="text-gray-400 hover:text-gray-300"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <span className="flex-1">{option.label}</span>
-                    <button
-                      onClick={() => {
-                        setEditingMilestone(index);
-                        setTempMilestoneLabel(option.label);
-                      }}
-                      className="text-blue-400 hover:text-blue-300"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => deleteMilestone(index)}
-                      className="text-red-400 hover:text-red-300"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </>
-                )}
-              </div>
-            ))}
+            {milestoneOptions.map((option, index) => {
+              const isDefault = index < DEFAULT_MILESTONE_OPTIONS.length;
+              return (
+                <div key={option.value} className={`flex items-center gap-2 p-3 ${colors.cardBg} border ${colors.border} rounded`}>
+                  {editingMilestone === index ? (
+                    <>
+                      <input
+                        type="text"
+                        value={tempMilestoneLabel}
+                        onChange={(e) => setTempMilestoneLabel(e.target.value)}
+                        className="flex-1 bg-gray-700 border border-gray-600 text-white px-3 py-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        autoFocus
+                      />
+                      <button
+                        onClick={() => {
+                          updateMilestone(index, tempMilestoneLabel);
+                          saveMilestoneOptionsAndClose();
+                        }}
+                        className="text-green-400 hover:text-green-300"
+                      >
+                        <Save className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => setEditingMilestone(null)}
+                        className="text-gray-400 hover:text-gray-300"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <span className="flex-1">{option.label}</span>
+                      {isDefault ? (
+                        <span className="text-xs text-gray-500 px-2 py-1 rounded bg-gray-700">Default</span>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => {
+                              setEditingMilestone(index);
+                              setTempMilestoneLabel(option.label);
+                            }}
+                            className="text-blue-400 hover:text-blue-300"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => deleteMilestone(index)}
+                            className="text-red-400 hover:text-red-300"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </>
+                      )}
+                    </>
+                  )}
+                </div>
+              );
+            })}
           </div>
           <button
             onClick={addMilestone}

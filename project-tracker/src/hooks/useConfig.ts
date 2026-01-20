@@ -29,17 +29,20 @@ interface CategoryOpacity {
   support: number;
 }
 
+// Default milestone options shared across all realms
+const DEFAULT_MILESTONE_OPTIONS: MilestoneOption[] = [
+  { value: 'planned', label: 'PLANNED' },
+  { value: 'in-progress', label: 'In progress' },
+  { value: 'closed', label: 'CLOSED' },
+  { value: 'dev-complete', label: 'Dev Complete' },
+  { value: 'dev-merge-done', label: 'Dev Merge Done' },
+  { value: 'staging-merge-done', label: 'Staging Merge Done' },
+  { value: 'prod-merge-done', label: 'Prod Merge Done' },
+];
+
 export const useConfig = () => {
   const { userProfile } = useAuth();
-  const [milestoneOptions, setMilestoneOptions] = useState<MilestoneOption[]>([
-    { value: 'planned', label: 'PLANNED' },
-    { value: 'in-progress', label: 'In progress' },
-    { value: 'closed', label: 'CLOSED' },
-    { value: 'dev-complete', label: 'Dev Complete' },
-    { value: 'dev-merge-done', label: 'Dev Merge Done' },
-    { value: 'staging-merge-done', label: 'Staging Merge Done' },
-    { value: 'prod-merge-done', label: 'Prod Merge Done' },
-  ]);
+  const [milestoneOptions, setMilestoneOptions] = useState<MilestoneOption[]>(DEFAULT_MILESTONE_OPTIONS);
 
   const [rowColors, setRowColors] = useState<RowColors>({
     planned: '#fbdd2b',
@@ -104,7 +107,9 @@ export const useConfig = () => {
         .maybeSingle();
 
       if (milestoneData) {
-        setMilestoneOptions(milestoneData.config_value as MilestoneOption[]);
+        const customOptions = milestoneData.config_value as MilestoneOption[];
+        // Combine default options with custom realm-specific options
+        setMilestoneOptions([...DEFAULT_MILESTONE_OPTIONS, ...customOptions]);
       }
 
       if (colorData) {
