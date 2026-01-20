@@ -33,17 +33,16 @@ export const useTrackerData = () => {
       setLoading(true);
       setError(null);
 
+      // DEMO MODE: Skip auth check for demo, data will be fetched without user context
       const {
         data: { user },
         error: authError
       } = await supabase.auth.getUser();
 
-      if (authError || !user) {
-        setLoading(false);
-        return;
+      // Allow proceeding even without authenticated user for demo mode
+      if (user) {
+        setUser(user);
       }
-
-      setUser(user);
 
       console.log('[Tracker] Fetching data for realm:', currentRealm.id);
 
