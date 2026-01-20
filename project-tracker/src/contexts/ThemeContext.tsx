@@ -16,6 +16,9 @@ interface ThemeColors {
   accentHover: string;
   plannedRowBg: string;
   actualRowBg: string;
+  subtaskBg: string;
+  subSubtaskBg: string;
+  stickyColBg: string;
 }
 
 const themes: Record<ThemeOption, ThemeColors> = {
@@ -32,7 +35,10 @@ const themes: Record<ThemeOption, ThemeColors> = {
     accent: 'bg-blue-600',
     accentHover: 'hover:bg-blue-700',
     plannedRowBg: '#1f2937',
-    actualRowBg: '#374151'
+    actualRowBg: '#374151',
+    subtaskBg: '#4b5563',
+    subSubtaskBg: '#6b7280',
+    stickyColBg: '#1f2937'
   },
   productivity: {
     bg: 'bg-slate-900',
@@ -47,7 +53,10 @@ const themes: Record<ThemeOption, ThemeColors> = {
     accent: 'bg-sky-600',
     accentHover: 'hover:bg-sky-700',
     plannedRowBg: '#1e293b',
-    actualRowBg: '#334155'
+    actualRowBg: '#334155',
+    subtaskBg: '#475569',
+    subSubtaskBg: '#64748b',
+    stickyColBg: '#1e293b'
   },
   tech: {
     bg: 'bg-zinc-950',
@@ -62,7 +71,10 @@ const themes: Record<ThemeOption, ThemeColors> = {
     accent: 'bg-blue-500',
     accentHover: 'hover:bg-blue-600',
     plannedRowBg: '#18181b',
-    actualRowBg: '#27272a'
+    actualRowBg: '#27272a',
+    subtaskBg: '#3f3f46',
+    subSubtaskBg: '#52525b',
+    stickyColBg: '#18181b'
   },
   agile: {
     bg: 'bg-stone-900',
@@ -77,7 +89,10 @@ const themes: Record<ThemeOption, ThemeColors> = {
     accent: 'bg-green-600',
     accentHover: 'hover:bg-green-700',
     plannedRowBg: '#1c1917',
-    actualRowBg: '#292524'
+    actualRowBg: '#292524',
+    subtaskBg: '#44403c',
+    subSubtaskBg: '#57534e',
+    stickyColBg: '#1c1917'
   },
   modern: {
     bg: 'bg-slate-950',
@@ -92,7 +107,10 @@ const themes: Record<ThemeOption, ThemeColors> = {
     accent: 'bg-teal-600',
     accentHover: 'hover:bg-teal-700',
     plannedRowBg: '#020617',
-    actualRowBg: '#0f172a'
+    actualRowBg: '#0f172a',
+    subtaskBg: '#1e293b',
+    subSubtaskBg: '#334155',
+    stickyColBg: '#020617'
   },
   executive: {
     bg: 'bg-neutral-950',
@@ -107,7 +125,10 @@ const themes: Record<ThemeOption, ThemeColors> = {
     accent: 'bg-amber-600',
     accentHover: 'hover:bg-amber-700',
     plannedRowBg: '#0a0a0a',
-    actualRowBg: '#171717'
+    actualRowBg: '#171717',
+    subtaskBg: '#262626',
+    subSubtaskBg: '#404040',
+    stickyColBg: '#0a0a0a'
   },
   light: {
     bg: 'bg-gray-50',
@@ -122,7 +143,10 @@ const themes: Record<ThemeOption, ThemeColors> = {
     accent: 'bg-blue-600',
     accentHover: 'hover:bg-blue-700',
     plannedRowBg: '#e5e7eb',
-    actualRowBg: '#f3f4f6'
+    actualRowBg: '#f3f4f6',
+    subtaskBg: '#f9fafb',
+    subSubtaskBg: '#ffffff',
+    stickyColBg: '#e5e7eb'
   }
 };
 
