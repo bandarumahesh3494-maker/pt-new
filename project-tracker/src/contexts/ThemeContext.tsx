@@ -14,6 +14,8 @@ interface ThemeColors {
   rowOdd: string;
   accent: string;
   accentHover: string;
+  plannedRowBg: string;
+  actualRowBg: string;
 }
 
 const themes: Record<ThemeOption, ThemeColors> = {
@@ -28,7 +30,9 @@ const themes: Record<ThemeOption, ThemeColors> = {
     rowEven: 'bg-gray-800/50',
     rowOdd: 'bg-gray-800/80',
     accent: 'bg-blue-600',
-    accentHover: 'hover:bg-blue-700'
+    accentHover: 'hover:bg-blue-700',
+    plannedRowBg: '#1f2937',
+    actualRowBg: '#374151'
   },
   productivity: {
     bg: 'bg-slate-900',
@@ -41,7 +45,9 @@ const themes: Record<ThemeOption, ThemeColors> = {
     rowEven: 'bg-slate-800/50',
     rowOdd: 'bg-slate-800/80',
     accent: 'bg-sky-600',
-    accentHover: 'hover:bg-sky-700'
+    accentHover: 'hover:bg-sky-700',
+    plannedRowBg: '#1e293b',
+    actualRowBg: '#334155'
   },
   tech: {
     bg: 'bg-zinc-950',
@@ -54,7 +60,9 @@ const themes: Record<ThemeOption, ThemeColors> = {
     rowEven: 'bg-zinc-900/50',
     rowOdd: 'bg-zinc-900/80',
     accent: 'bg-blue-500',
-    accentHover: 'hover:bg-blue-600'
+    accentHover: 'hover:bg-blue-600',
+    plannedRowBg: '#18181b',
+    actualRowBg: '#27272a'
   },
   agile: {
     bg: 'bg-stone-900',
@@ -67,7 +75,9 @@ const themes: Record<ThemeOption, ThemeColors> = {
     rowEven: 'bg-stone-800/50',
     rowOdd: 'bg-stone-800/80',
     accent: 'bg-green-600',
-    accentHover: 'hover:bg-green-700'
+    accentHover: 'hover:bg-green-700',
+    plannedRowBg: '#1c1917',
+    actualRowBg: '#292524'
   },
   modern: {
     bg: 'bg-slate-950',
@@ -80,7 +90,9 @@ const themes: Record<ThemeOption, ThemeColors> = {
     rowEven: 'bg-slate-900/50',
     rowOdd: 'bg-slate-900/80',
     accent: 'bg-teal-600',
-    accentHover: 'hover:bg-teal-700'
+    accentHover: 'hover:bg-teal-700',
+    plannedRowBg: '#020617',
+    actualRowBg: '#0f172a'
   },
   executive: {
     bg: 'bg-neutral-950',
@@ -93,7 +105,9 @@ const themes: Record<ThemeOption, ThemeColors> = {
     rowEven: 'bg-neutral-900/50',
     rowOdd: 'bg-neutral-900/80',
     accent: 'bg-amber-600',
-    accentHover: 'hover:bg-amber-700'
+    accentHover: 'hover:bg-amber-700',
+    plannedRowBg: '#0a0a0a',
+    actualRowBg: '#171717'
   },
   light: {
     bg: 'bg-gray-50',
@@ -106,7 +120,9 @@ const themes: Record<ThemeOption, ThemeColors> = {
     rowEven: 'bg-gray-50',
     rowOdd: 'bg-white',
     accent: 'bg-blue-600',
-    accentHover: 'hover:bg-blue-700'
+    accentHover: 'hover:bg-blue-700',
+    plannedRowBg: '#e5e7eb',
+    actualRowBg: '#f3f4f6'
   }
 };
 

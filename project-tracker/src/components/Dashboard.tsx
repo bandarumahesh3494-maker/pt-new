@@ -141,15 +141,6 @@ export const Dashboard: React.FC = () => {
     return 'bg-gray-500/90 text-white font-semibold';
   };
 
-  const getActualRowColor = (milestoneText: string | undefined): string => {
-    // return 'rgba(59, 130, 246, 0.35)';
-    return '#0284c7';
-  };
-
-  const getPlannedRowColor = (): string => {
-    // return '#dec3257d';
-    return '#1c2f49';
-  };
 
   const handleCategoryChange = async (taskId: string, newCategory: string) => {
     try {
@@ -624,19 +615,19 @@ export const Dashboard: React.FC = () => {
           <table className="w-full border-collapse">
             <thead className="sticky top-0 z-30">
               <tr className={`${colors.headerBg} backdrop-blur border-b ${colors.border}`}>
-                 <th className={`sticky left-0 z-40 ${colors.headerBg} border-2 border-white/20 px-4 py-3 text-left font-semibold min-w-[60px]`}>
+                 <th className={`sticky left-0 z-40 ${colors.headerBg} border-2 ${colors.border} px-4 py-3 text-left font-semibold min-w-[60px]`}>
                   ID
                 </th>
-                <th className={`sticky left-[60px] z-40 ${colors.headerBg} border-2 border-white/20 px-4 py-3 text-left font-semibold min-w-[120px]`}>
+                <th className={`sticky left-[60px] z-40 ${colors.headerBg} border-2 ${colors.border} px-4 py-3 text-left font-semibold min-w-[120px]`}>
                   Category
                 </th>
-                <th className={`sticky left-[180px] z-40 ${colors.headerBg} border-2 border-white/20 px-4 py-3 text-left font-semibold min-w-[180px]`}>
+                <th className={`sticky left-[180px] z-40 ${colors.headerBg} border-2 ${colors.border} px-4 py-3 text-left font-semibold min-w-[180px]`}>
                   Task Name
                 </th>
-                <th className={`sticky left-[412px] z-40 ${colors.headerBg} border-2 border-white/20 px-4 py-3 text-left font-semibold min-w-[150px]`}>
+                <th className={`sticky left-[412px] z-40 ${colors.headerBg} border-2 ${colors.border} px-4 py-3 text-left font-semibold min-w-[150px]`}>
                   Sub Task
                 </th>
-                <th className={`sticky left-[600px] z-40 ${colors.headerBg} border-2 border-white/20 px-4 py-3 text-left font-semibold min-w-[150px]`}>
+                <th className={`sticky left-[600px] z-40 ${colors.headerBg} border-2 ${colors.border} px-4 py-3 text-left font-semibold min-w-[150px]`}>
                   Engineer/Lead
                 </th>
                 {dateRange.map(date => (
@@ -696,7 +687,7 @@ export const Dashboard: React.FC = () => {
                         <tr>
                             <td className={`sticky left-0 z-20 ${colors.bgSecondary} border-2 ${colors.border} px-4 font-semibold ${colors.textSecondary}`}>{index + 1}</td>
 
-                          <td className={`sticky left-[60px] z-20 border-2 border-white/20 px-2 py-3 ${getCategoryColor(task.category)}`}>
+                          <td className={`sticky left-[60px] z-20 border-2 ${colors.border} px-2 py-3 ${getCategoryColor(task.category)}`}>
                             <select disabled={!canEditTask(task)}
                               value={task.category}
                               onChange={(e) => handleCategoryChange(task.id, e.target.value)}
@@ -757,10 +748,10 @@ export const Dashboard: React.FC = () => {
                           {/* PLANNED Row */}
                           {plannedSubtask && (
                             <>
-                              <tr style={{ backgroundColor: getPlannedRowColor() }} className={colors.text}>
+                              <tr style={{ backgroundColor: colors.plannedRowBg }} className={colors.text}>
                             <td rowSpan={totalRows} className={`sticky left-0 z-20 ${colors.bgSecondary} border-2 ${colors.border} px-4`} >{index + 1}</td>
 
-                                <td rowSpan={totalRows} className={`sticky left-[60px] z-20 border-2 border-white/20 px-2 py-3 ${getCategoryColor(task.category)}`}>
+                                <td rowSpan={totalRows} className={`sticky left-[60px] z-20 border-2 ${colors.border} px-2 py-3 ${getCategoryColor(task.category)}`}>
                                   <select disabled={!canEditTask(task)}
                                     value={task.category}
                                     onChange={(e) => handleCategoryChange(task.id, e.target.value)}
@@ -818,7 +809,7 @@ export const Dashboard: React.FC = () => {
                                     </button>
                                   )}
                                 </td>
-                                <td className="sticky left-[412px] z-20 border-2 border-white/20 px-4 py-3 font-semibold" style={{ backgroundColor: getPlannedRowColor() }}>
+                                <td className="sticky left-[412px] z-20 border-2 ${colors.border} px-4 py-3 font-semibold" style={{ backgroundColor: colors.plannedRowBg }}>
                                   <div className="flex items-center gap-2">
                                     {plannedSubtask.subSubtasks.length > 0 && (
                                       <button
@@ -835,7 +826,7 @@ export const Dashboard: React.FC = () => {
                                     )}
                                     <div>{plannedSubtask.subtask.name}</div>
                                     {plannedSubtask.subSubtasks.length > 0 && (
-                                      <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">
+                                      <span className="text-xs ${colors.bgTertiary}/20 px-2 py-0.5 rounded-full">
                                         {plannedSubtask.subSubtasks.length}
                                       </span>
                                     )}
@@ -848,7 +839,7 @@ export const Dashboard: React.FC = () => {
                                     Add Sub-Subtask
                                   </button>
                                 </td>
-                                <td className={`sticky ${engineerLeadPosition} z-10 border-2 ${colors.border} px-2 py-3`} style={{ backgroundColor: getPlannedRowColor() }}>
+                                <td className={`sticky ${engineerLeadPosition} z-10 border-2 ${colors.border} px-2 py-3`} style={{ backgroundColor: colors.plannedRowBg }}>
                                   <select disabled={!canEditTask(plannedSubtask.subtask)}
                                     value={plannedSubtask.subtask.assigned_to || ''}
                                     onChange={(e) => handleAssignmentChange(plannedSubtask.subtask.id, e.target.value || null)}
@@ -865,7 +856,7 @@ export const Dashboard: React.FC = () => {
                                 {dateRange.map(date => {
                                   const milestonesForDate = plannedSubtask.milestones.filter(m => m.milestone_date === date);
                                   return (
-                                    <td key={date} className={`border ${colors.border} px-2 py-2 align-top`} style={{ backgroundColor: getPlannedRowColor() }}>
+                                    <td key={date} className={`border ${colors.border} px-2 py-2 align-top`} style={{ backgroundColor: colors.plannedRowBg }}>
                                       <div className="space-y-1">
                                         {milestonesForDate.map(milestone => (
                                           <div
@@ -914,8 +905,8 @@ export const Dashboard: React.FC = () => {
                               </tr>
                               {/* PLANNED Sub-Subtasks */}
                               {!collapsedSubtasks.has(plannedSubtask.subtask.id) && plannedSubtask.subSubtasks.map(sst => (
-                                <tr key={sst.subSubtask.id} style={{ backgroundColor: getPlannedRowColor() }} className={colors.text}>
-                                  <td className={`sticky left-[412px] z-20 border-2 ${colors.border} px-4 py-3 pl-8`} style={{ backgroundColor: getPlannedRowColor() }}>
+                                <tr key={sst.subSubtask.id} style={{ backgroundColor: colors.plannedRowBg }} className={colors.text}>
+                                  <td className={`sticky left-[412px] z-20 border-2 ${colors.border} px-4 py-3 pl-8`} style={{ backgroundColor: colors.plannedRowBg }}>
                                     <div className="flex items-center gap-2">
                                       <span className={colors.textSecondary}>↳</span> {sst.subSubtask.name}
                                       <button disabled={!canEditTask(sst.subSubtask)}
@@ -934,7 +925,7 @@ export const Dashboard: React.FC = () => {
                                       </button>
                                     </div>
                                   </td>
-                                  <td className={`sticky ${engineerLeadPosition} z-10 border-2 ${colors.border} px-2 py-3`} style={{ backgroundColor: getPlannedRowColor() }}>
+                                  <td className={`sticky ${engineerLeadPosition} z-10 border-2 ${colors.border} px-2 py-3`} style={{ backgroundColor: colors.plannedRowBg }}>
                                     <select disabled={!canEditTask(sst.subSubtask)}
                                       value={sst.subSubtask.assigned_to || ''}
                                       onChange={(e) => handleSubSubtaskAssignmentChange(sst.subSubtask.id, e.target.value || null)}
@@ -951,7 +942,7 @@ export const Dashboard: React.FC = () => {
                                   {dateRange.map(date => {
                                     const milestonesForDate = sst.milestones.filter(m => m.milestone_date === date);
                                     return (
-                                      <td key={date} className={`border ${colors.border} px-2 py-2 align-top`} style={{ backgroundColor: getPlannedRowColor() }}>
+                                      <td key={date} className={`border ${colors.border} px-2 py-2 align-top`} style={{ backgroundColor: colors.plannedRowBg }}>
                                         <div className="space-y-1">
                                           {milestonesForDate.map(milestone => (
                                             <div
@@ -1003,11 +994,11 @@ export const Dashboard: React.FC = () => {
                           )}
 
                           {/* ACTUAL Row */}
-                          <tr style={{ backgroundColor: getActualRowColor(undefined) }}>
+                          <tr style={{ backgroundColor: colors.actualRowBg }}>
                             {!plannedSubtask && (
                               <>
-                                <td rowSpan={totalRows} className="sticky left-0 z-20 bg-[#1a2332] border-2 border-white/20 px-4">{index + 1}</td>
-                                <td rowSpan={totalRows} className={`sticky left-[60px] z-20 border-2 border-white/20 px-2 py-3 ${getCategoryColor(task.category)}`}>
+                                <td rowSpan={totalRows} className={`sticky left-0 z-20 ${colors.bgSecondary} border-2 ${colors.border} px-4`}>{index + 1}</td>
+                                <td rowSpan={totalRows} className={`sticky left-[60px] z-20 border-2 ${colors.border} px-2 py-3 ${getCategoryColor(task.category)}`}>
 
                                   <select disabled={!canEditTask(task)}
                                     value={task.category}
@@ -1056,12 +1047,12 @@ export const Dashboard: React.FC = () => {
                                 </td>
                               </>
                             )}
-                            <td className={`sticky left-[412px] z-20 border-2 ${colors.border} px-4 py-3 font-semibold`} style={{ backgroundColor: getActualRowColor(undefined) }}>
+                            <td className={`sticky left-[412px] z-20 border-2 ${colors.border} px-4 py-3 font-semibold`} style={{ backgroundColor: colors.actualRowBg }}>
                               <div className="flex items-center gap-2">
                                 {otherSubtasks.length > 0 && (
                                   <button
                                     onClick={() => toggleTaskSubtasks(task.id)}
-                                    className="text-white hover:text-sky-300 transition-transform"
+                                    className={`${colors.text} hover:text-sky-300 transition-transform`}
                                     title={isActualCollapsed ? 'Expand subtasks' : 'Collapse subtasks'}
                                   >
                                     {isActualCollapsed ? (
@@ -1073,17 +1064,17 @@ export const Dashboard: React.FC = () => {
                                 )}
                                 <div>ACTUAL</div>
                                 {otherSubtasks.length > 0 && (
-                                  <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">
+                                  <span className="text-xs ${colors.bgTertiary}/20 px-2 py-0.5 rounded-full">
                                     {otherSubtasks.length}
                                   </span>
                                 )}
                               </div>
                             </td>
-                            <td className={`sticky ${engineerLeadPosition} z-10 border-2 ${colors.border} px-2 py-3 ${colors.textSecondary} text-xs`} style={{ backgroundColor: getActualRowColor(undefined) }}>-</td>
+                            <td className={`sticky ${engineerLeadPosition} z-10 border-2 ${colors.border} px-2 py-3 ${colors.textSecondary} text-xs`} style={{ backgroundColor: colors.actualRowBg }}>-</td>
                             {dateRange.map(date => {
                               const milestoneText = actualMilestones[date];
                               return (
-                                <td key={date} className={`border ${colors.border} px-2 py-2 align-top`} style={{ backgroundColor: getActualRowColor(milestoneText) }}>
+                                <td key={date} className={`border ${colors.border} px-2 py-2 align-top`} style={{ backgroundColor: colors.actualRowBg }}>
                                   {milestoneText && (
                                     <div className={`text-xs px-2 py-1 rounded ${getMilestoneColor(milestoneText)}`}>
                                       {milestoneText}
@@ -1115,7 +1106,7 @@ export const Dashboard: React.FC = () => {
                                     )}
                                     {st.subtask.name}
                                     {st.subSubtasks.length > 0 && (
-                                      <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">
+                                      <span className="text-xs ${colors.bgTertiary}/20 px-2 py-0.5 rounded-full">
                                         {st.subSubtasks.length}
                                       </span>
                                     )}
