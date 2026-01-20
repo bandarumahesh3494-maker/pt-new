@@ -146,10 +146,10 @@ export const ConfigDashboard: React.FC = () => {
         .from('app_config')
         .update({
           config_value: milestoneOptions,
-          updated_at: new Date().toISOString(),
-          realm_id: userProfile?.realm_id
+          updated_at: new Date().toISOString()
         })
-        .eq('config_key', 'milestone_options');
+        .eq('config_key', 'milestone_options')
+        .eq('realm_id', userProfile?.realm_id);
 
       if (error) throw error;
     } catch (err) {
@@ -163,10 +163,10 @@ export const ConfigDashboard: React.FC = () => {
         .from('app_config')
         .update({
           config_value: rowColors,
-          updated_at: new Date().toISOString(),
-          realm_id: userProfile?.realm_id
+          updated_at: new Date().toISOString()
         })
-        .eq('config_key', 'row_colors');
+        .eq('config_key', 'row_colors')
+        .eq('realm_id', userProfile?.realm_id);
 
       if (error) throw error;
     } catch (err) {
@@ -180,19 +180,19 @@ export const ConfigDashboard: React.FC = () => {
         .from('app_config')
         .update({
           config_value: categoryColors,
-          updated_at: new Date().toISOString(),
-          realm_id: userProfile?.realm_id
+          updated_at: new Date().toISOString()
         })
-        .eq('config_key', 'category_colors');
+        .eq('config_key', 'category_colors')
+        .eq('realm_id', userProfile?.realm_id);
 
       const opacityError = await supabase
         .from('app_config')
         .update({
           config_value: categoryOpacity,
-          updated_at: new Date().toISOString(),
-          realm_id: userProfile?.realm_id
+          updated_at: new Date().toISOString()
         })
-        .eq('config_key', 'category_opacity');
+        .eq('config_key', 'category_opacity')
+        .eq('realm_id', userProfile?.realm_id);
 
       if (colorsError.error) throw colorsError.error;
       if (opacityError.error) throw opacityError.error;
@@ -214,10 +214,10 @@ export const ConfigDashboard: React.FC = () => {
         .from('app_config')
         .update({
           config_value: updated,
-          updated_at: new Date().toISOString(),
-          realm_id: userProfile?.realm_id
+          updated_at: new Date().toISOString()
         })
-        .eq('config_key', 'milestone_options');
+        .eq('config_key', 'milestone_options')
+        .eq('realm_id', userProfile?.realm_id);
 
       if (error) throw error;
     } catch (err) {
@@ -240,10 +240,10 @@ export const ConfigDashboard: React.FC = () => {
         .from('app_config')
         .update({
           config_value: updated,
-          updated_at: new Date().toISOString(),
-          realm_id: userProfile?.realm_id
+          updated_at: new Date().toISOString()
         })
-        .eq('config_key', 'milestone_options');
+        .eq('config_key', 'milestone_options')
+        .eq('realm_id', userProfile?.realm_id);
 
       if (error) throw error;
     } catch (err) {
