@@ -544,14 +544,14 @@ export const Dashboard: React.FC = () => {
 
   if (loading || configLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-white text-xl font-bold animate-pulse">Loading...</div>
+      <div className={`min-h-screen ${colors.bg} flex items-center justify-center`}>
+        <div className={`${colors.text} text-xl font-bold animate-pulse`}>Loading...</div>
       </div>
     );
   }
   if (error) {
     return (
-      <div className="min-h-screen bg-[#0a0f1e] flex items-center justify-center">
+      <div className={`min-h-screen ${colors.bg} flex items-center justify-center`}>
         <div className="text-rose-400 text-xl font-bold">Error: {error}</div>
       </div>
     );
@@ -562,8 +562,8 @@ export const Dashboard: React.FC = () => {
       <header className={`${colors.headerBg} border-b ${colors.border} px-6 py-4 z-20 sticky top-[0px]`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Calendar className="w-8 h-8 text-sky-400" />
-            <h1 className="text-2xl font-bold">Project Tracker</h1>
+            <Calendar className={`w-8 h-8 ${colors.accent.replace('bg-', 'text-')}`} />
+            <h1 className={`text-2xl font-bold ${colors.text}`}>Project Tracker</h1>
           </div>
           <div className="flex gap-3">
             <select
@@ -610,7 +610,7 @@ export const Dashboard: React.FC = () => {
             </button>
             <button
               onClick={() => setShowAddTask(true)}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-5 py-2.5 rounded-xl transition-all font-bold shadow-lg hover:shadow-xl transform hover:scale-105 text-white"
+              className={`flex items-center gap-2 ${colors.accent} ${colors.accentHover} px-5 py-2.5 rounded-xl transition-all font-bold shadow-lg hover:shadow-xl transform hover:scale-105 text-white`}
             >
               <Plus className="w-5 h-5" />
               Add Task
@@ -694,21 +694,21 @@ export const Dashboard: React.FC = () => {
                     <React.Fragment key={task.id}>
                       {subtasks.length === 0 ? (
                         <tr>
-                            <td className="sticky left-0 z-20 bg-[#1a2332] border-2 border-white/20 px-4 font-semibold text-slate-300">{index + 1}</td>
+                            <td className={`sticky left-0 z-20 ${colors.bgSecondary} border-2 ${colors.border} px-4 font-semibold ${colors.textSecondary}`}>{index + 1}</td>
 
                           <td className={`sticky left-[60px] z-20 border-2 border-white/20 px-2 py-3 ${getCategoryColor(task.category)}`}>
                             <select disabled={!canEditTask(task)}
                               value={task.category}
                               onChange={(e) => handleCategoryChange(task.id, e.target.value)}
-                              className="w-full bg-transparent border-none text-white font-medium uppercase focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                              className={`w-full bg-transparent border-none ${colors.text} font-medium uppercase focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1 disabled:opacity-50 disabled:cursor-not-allowed`}
                             >
-                              <option value="dev" className="bg-[#141b2a]">DEV</option>
-                              <option value="test" className="bg-[#141b2a]">TEST</option>
-                              <option value="infra" className="bg-[#141b2a]">INFRA</option>
-                              <option value="support" className="bg-[#141b2a]">SUPPORT</option>
+                              <option value="dev" className={colors.bgTertiary}>DEV</option>
+                              <option value="test" className={colors.bgTertiary}>TEST</option>
+                              <option value="infra" className={colors.bgTertiary}>INFRA</option>
+                              <option value="support" className={colors.bgTertiary}>SUPPORT</option>
                             </select>
                           </td>
-                          <td className="sticky left-[180px] z-20 bg-[#1a2332] border-2 border-white/20 px-4 py-3 font-medium">
+                          <td className={`sticky left-[180px] z-20 ${colors.bgSecondary} border-2 ${colors.border} px-4 py-3 font-medium`}>
                             <div className="flex items-center gap-2">
                               <div className="flex items-center gap-1">
                                 {[1, 2, 3].map((star) => (
@@ -746,10 +746,10 @@ export const Dashboard: React.FC = () => {
                               Add Subtask
                             </button>
                           </td>
-                          <td className="sticky left-[412px] z-20 bg-[#1a2332] border-2 border-white/20 px-4 py-3">-</td>
-                          <td className="sticky left-[562px] z-10 bg-[#1a2332] border-2 border-white/20 px-4 py-3">-</td>
+                          <td className={`sticky left-[412px] z-20 ${colors.bgSecondary} border-2 ${colors.border} px-4 py-3`}>-</td>
+                          <td className={`sticky left-[562px] z-10 ${colors.bgSecondary} border-2 ${colors.border} px-4 py-3`}>-</td>
                           {dateRange.map(date => (
-                            <td key={date} className="border border-white/5 px-3 py-2 bg-[#0f1624]"></td>
+                            <td key={date} className={`border ${colors.border} px-3 py-2 ${colors.bg}`}></td>
                           ))}
                         </tr>
                       ) : (
@@ -757,22 +757,22 @@ export const Dashboard: React.FC = () => {
                           {/* PLANNED Row */}
                           {plannedSubtask && (
                             <>
-                              <tr style={{ backgroundColor: getPlannedRowColor() }} className="text-white">
-                            <td rowSpan={totalRows} className="sticky left-0 z-20 bg-[#1a2332] border-2 border-white/20 px-4" >{index + 1}</td>
+                              <tr style={{ backgroundColor: getPlannedRowColor() }} className={colors.text}>
+                            <td rowSpan={totalRows} className={`sticky left-0 z-20 ${colors.bgSecondary} border-2 ${colors.border} px-4`} >{index + 1}</td>
 
                                 <td rowSpan={totalRows} className={`sticky left-[60px] z-20 border-2 border-white/20 px-2 py-3 ${getCategoryColor(task.category)}`}>
                                   <select disabled={!canEditTask(task)}
                                     value={task.category}
                                     onChange={(e) => handleCategoryChange(task.id, e.target.value)}
-                                    className="w-full bg-transparent border border-white/20 text-white font-medium uppercase focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className={`w-full bg-transparent border ${colors.border} ${colors.text} font-medium uppercase focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1 disabled:opacity-50 disabled:cursor-not-allowed`}
                                   >
-                                    <option value="dev" className="bg-[#141b2a]">DEV</option>
-                                    <option value="test" className="bg-[#141b2a]">TEST</option>
-                                    <option value="infra" className="bg-[#141b2a]">INFRA</option>
-                                    <option value="support" className="bg-[#141b2a]">SUPPORT</option>
+                                    <option value="dev" className={colors.bgTertiary}>DEV</option>
+                                    <option value="test" className={colors.bgTertiary}>TEST</option>
+                                    <option value="infra" className={colors.bgTertiary}>INFRA</option>
+                                    <option value="support" className={colors.bgTertiary}>SUPPORT</option>
                                   </select>
                                 </td>
-                                <td rowSpan={totalRows} className="sticky left-[180px] z-20 bg-[#1a2332] border-2 border-white/20 px-4 py-3">
+                                <td rowSpan={totalRows} className={`sticky left-[180px] z-20 ${colors.bgSecondary} border-2 ${colors.border} px-4 py-3`}>
                                   <div className="font-medium flex items-center gap-2">
                                     <div className="flex items-center gap-1">
                                       {[1, 2, 3].map((star) => (
@@ -812,7 +812,7 @@ export const Dashboard: React.FC = () => {
                                   {otherSubtasks.length > 0 && (
                                     <button disabled={!canEditTask(task)}
                                       onClick={() => toggleTaskSubtasks(task.id)}
-                                      className="text-slate-300 hover:text-white text-xs flex items-center gap-1 mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                      className={`${colors.textSecondary} hover:${colors.text} text-xs flex items-center gap-1 mt-2 disabled:opacity-50 disabled:cursor-not-allowed`}
                                     >
                                       {isActualCollapsed ? 'Show Subtasks' : 'Hide Subtasks'}
                                     </button>
@@ -823,7 +823,7 @@ export const Dashboard: React.FC = () => {
                                     {plannedSubtask.subSubtasks.length > 0 && (
                                       <button
                                         onClick={() => toggleSubtaskCollapse(plannedSubtask.subtask.id)}
-                                        className="text-white hover:text-sky-300 transition-transform"
+                                        className={`${colors.text} hover:text-sky-300 transition-transform`}
                                         title={collapsedSubtasks.has(plannedSubtask.subtask.id) ? 'Expand sub-subtasks' : 'Collapse sub-subtasks'}
                                       >
                                         {collapsedSubtasks.has(plannedSubtask.subtask.id) ? (
@@ -848,11 +848,11 @@ export const Dashboard: React.FC = () => {
                                     Add Sub-Subtask
                                   </button>
                                 </td>
-                                <td className={`sticky ${engineerLeadPosition} z-10 border-2 border-white/20 px-2 py-3`} style={{ backgroundColor: getPlannedRowColor() }}>
+                                <td className={`sticky ${engineerLeadPosition} z-10 border-2 ${colors.border} px-2 py-3`} style={{ backgroundColor: getPlannedRowColor() }}>
                                   <select disabled={!canEditTask(plannedSubtask.subtask)}
                                     value={plannedSubtask.subtask.assigned_to || ''}
                                     onChange={(e) => handleAssignmentChange(plannedSubtask.subtask.id, e.target.value || null)}
-                                    className="w-full bg-[#1a2332] border border-white/20 shadow-sm text-white text-sm rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className={`w-full ${colors.bgSecondary} border ${colors.border} shadow-sm ${colors.text} text-sm rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed`}
                                   >
                                     <option value="">Unassigned</option>
                                     {users.map(u => (
@@ -865,7 +865,7 @@ export const Dashboard: React.FC = () => {
                                 {dateRange.map(date => {
                                   const milestonesForDate = plannedSubtask.milestones.filter(m => m.milestone_date === date);
                                   return (
-                                    <td key={date} className="border border-white/5 px-2 py-2 align-top" style={{ backgroundColor: getPlannedRowColor() }}>
+                                    <td key={date} className={`border ${colors.border} px-2 py-2 align-top`} style={{ backgroundColor: getPlannedRowColor() }}>
                                       <div className="space-y-1">
                                         {milestonesForDate.map(milestone => (
                                           <div
@@ -892,7 +892,7 @@ export const Dashboard: React.FC = () => {
                                               }
                                             }}
                                             onBlur={() => setOpenDropdown(null)}
-                                            className="w-full bg-[#1a2332] border border-white/20 shadow-sm text-white text-xs rounded px-1 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            className={`w-full ${colors.bgSecondary} border ${colors.border} shadow-sm ${colors.text} text-xs rounded px-1 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500`}
                                           >
                                             <option value="">Select...</option>
                                             {milestoneOptions.map(option => (
@@ -902,7 +902,7 @@ export const Dashboard: React.FC = () => {
                                         ) : (
                                           <button disabled={!canEditTask(plannedSubtask.subtask)}
                                             onClick={() => setOpenDropdown(`subtask-${plannedSubtask.subtask.id}-${date}`)}
-                                            className="w-6 h-6 bg-gray-700 hover:bg-gray-800 border border-gray-600 text-white text-xs rounded flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className={`w-6 h-6 ${colors.bgTertiary} hover:${colors.bgSecondary} border ${colors.border} ${colors.text} text-xs rounded flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
                                           >
                                             +
                                           </button>
@@ -914,10 +914,10 @@ export const Dashboard: React.FC = () => {
                               </tr>
                               {/* PLANNED Sub-Subtasks */}
                               {!collapsedSubtasks.has(plannedSubtask.subtask.id) && plannedSubtask.subSubtasks.map(sst => (
-                                <tr key={sst.subSubtask.id} style={{ backgroundColor: getPlannedRowColor() }} className="text-white">
-                                  <td className="sticky left-[412px] z-20 border-2 border-white/20 px-4 py-3 pl-8" style={{ backgroundColor: getPlannedRowColor() }}>
+                                <tr key={sst.subSubtask.id} style={{ backgroundColor: getPlannedRowColor() }} className={colors.text}>
+                                  <td className={`sticky left-[412px] z-20 border-2 ${colors.border} px-4 py-3 pl-8`} style={{ backgroundColor: getPlannedRowColor() }}>
                                     <div className="flex items-center gap-2">
-                                      <span className="text-gray-700">↳</span> {sst.subSubtask.name}
+                                      <span className={colors.textSecondary}>↳</span> {sst.subSubtask.name}
                                       <button disabled={!canEditTask(sst.subSubtask)}
                                         onClick={() => setShowEditSubSubtask({ subSubtaskId: sst.subSubtask.id, subSubtaskName: sst.subSubtask.name, parentSubtaskName: plannedSubtask.subtask.name })}
                                         className="text-sky-400 hover:text-sky-300 hover:scale-110 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -934,11 +934,11 @@ export const Dashboard: React.FC = () => {
                                       </button>
                                     </div>
                                   </td>
-                                  <td className={`sticky ${engineerLeadPosition} z-10 border-2 border-white/20 px-2 py-3`} style={{ backgroundColor: getPlannedRowColor() }}>
+                                  <td className={`sticky ${engineerLeadPosition} z-10 border-2 ${colors.border} px-2 py-3`} style={{ backgroundColor: getPlannedRowColor() }}>
                                     <select disabled={!canEditTask(sst.subSubtask)}
                                       value={sst.subSubtask.assigned_to || ''}
                                       onChange={(e) => handleSubSubtaskAssignmentChange(sst.subSubtask.id, e.target.value || null)}
-                                      className="w-full bg-[#1a2332] border border-white/20 shadow-sm text-white text-sm rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                      className={`w-full ${colors.bgSecondary} border ${colors.border} shadow-sm ${colors.text} text-sm rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed`}
                                     >
                                       <option value="">Unassigned</option>
                                       {users.map(u => (
@@ -951,7 +951,7 @@ export const Dashboard: React.FC = () => {
                                   {dateRange.map(date => {
                                     const milestonesForDate = sst.milestones.filter(m => m.milestone_date === date);
                                     return (
-                                      <td key={date} className="border border-white/5 px-2 py-2 align-top" style={{ backgroundColor: getPlannedRowColor() }}>
+                                      <td key={date} className={`border ${colors.border} px-2 py-2 align-top`} style={{ backgroundColor: getPlannedRowColor() }}>
                                         <div className="space-y-1">
                                           {milestonesForDate.map(milestone => (
                                             <div
@@ -978,7 +978,7 @@ export const Dashboard: React.FC = () => {
                                                 }
                                               }}
                                               onBlur={() => setOpenDropdown(null)}
-                                              className="w-full bg-[#1a2332] border border-white/20 shadow-sm text-white text-xs rounded px-1 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                              className={`w-full ${colors.bgSecondary} border ${colors.border} shadow-sm ${colors.text} text-xs rounded px-1 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500`}
                                             >
                                               <option value="">Select...</option>
                                               {milestoneOptions.map(option => (
@@ -988,7 +988,7 @@ export const Dashboard: React.FC = () => {
                                           ) : (
                                             <button disabled={!canEditTask(sst.subSubtask)}
                                               onClick={() => setOpenDropdown(`subsubtask-${sst.subSubtask.id}-${date}`)}
-                                              className="w-6 h-6 bg-gray-700 hover:bg-gray-800 border border-gray-600 text-white text-xs rounded flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                              className={`w-6 h-6 ${colors.bgTertiary} hover:${colors.bgSecondary} border ${colors.border} ${colors.text} text-xs rounded flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
                                             >
                                               +
                                             </button>
@@ -1012,15 +1012,15 @@ export const Dashboard: React.FC = () => {
                                   <select disabled={!canEditTask(task)}
                                     value={task.category}
                                     onChange={(e) => handleCategoryChange(task.id, e.target.value)}
-                                    className="w-full bg-transparent border border-white/20 text-white font-medium uppercase focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className={`w-full bg-transparent border ${colors.border} ${colors.text} font-medium uppercase focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1 disabled:opacity-50 disabled:cursor-not-allowed`}
                                   >
-                                    <option value="dev" className="bg-[#141b2a]">DEV</option>
-                                    <option value="test" className="bg-[#141b2a]">TEST</option>
-                                    <option value="infra" className="bg-[#141b2a]">INFRA</option>
-                                    <option value="support" className="bg-[#141b2a]">SUPPORT</option>
+                                    <option value="dev" className={colors.bgTertiary}>DEV</option>
+                                    <option value="test" className={colors.bgTertiary}>TEST</option>
+                                    <option value="infra" className={colors.bgTertiary}>INFRA</option>
+                                    <option value="support" className={colors.bgTertiary}>SUPPORT</option>
                                   </select>
                                 </td>
-                                <td rowSpan={totalRows} className="sticky left-[180px] z-20 bg-[#1a2332] border-2 border-white/20 px-4 py-3">
+                                <td rowSpan={totalRows} className={`sticky left-[180px] z-20 ${colors.bgSecondary} border-2 ${colors.border} px-4 py-3`}>
                                   <div className="font-medium flex items-center gap-2">
                                     {task.name}
                                     <button disabled={!canEditTask(task)}
@@ -1048,7 +1048,7 @@ export const Dashboard: React.FC = () => {
                                   {otherSubtasks.length > 0 && (
                                     <button disabled={!canEditTask(task)}
                                       onClick={() => toggleTaskSubtasks(task.id)}
-                                      className="text-slate-300 hover:text-white text-xs flex items-center gap-1 mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                      className={`${colors.textSecondary} hover:${colors.text} text-xs flex items-center gap-1 mt-2 disabled:opacity-50 disabled:cursor-not-allowed`}
                                     >
                                       {isActualCollapsed ? 'Show Subtasks' : 'Hide Subtasks'}
                                     </button>
@@ -1056,7 +1056,7 @@ export const Dashboard: React.FC = () => {
                                 </td>
                               </>
                             )}
-                            <td className="sticky left-[412px] z-20 border-2 border-white/20 px-4 py-3 font-semibold" style={{ backgroundColor: getActualRowColor(undefined) }}>
+                            <td className={`sticky left-[412px] z-20 border-2 ${colors.border} px-4 py-3 font-semibold`} style={{ backgroundColor: getActualRowColor(undefined) }}>
                               <div className="flex items-center gap-2">
                                 {otherSubtasks.length > 0 && (
                                   <button
@@ -1079,11 +1079,11 @@ export const Dashboard: React.FC = () => {
                                 )}
                               </div>
                             </td>
-                            <td className={`sticky ${engineerLeadPosition} z-10 border-2 border-white/20 px-2 py-3 text-slate-400 text-xs`} style={{ backgroundColor: getActualRowColor(undefined) }}>-</td>
+                            <td className={`sticky ${engineerLeadPosition} z-10 border-2 ${colors.border} px-2 py-3 ${colors.textSecondary} text-xs`} style={{ backgroundColor: getActualRowColor(undefined) }}>-</td>
                             {dateRange.map(date => {
                               const milestoneText = actualMilestones[date];
                               return (
-                                <td key={date} className="border border-white/5 px-2 py-2 align-top" style={{ backgroundColor: getActualRowColor(milestoneText) }}>
+                                <td key={date} className={`border ${colors.border} px-2 py-2 align-top`} style={{ backgroundColor: getActualRowColor(milestoneText) }}>
                                   {milestoneText && (
                                     <div className={`text-xs px-2 py-1 rounded ${getMilestoneColor(milestoneText)}`}>
                                       {milestoneText}
@@ -1097,13 +1097,13 @@ export const Dashboard: React.FC = () => {
                           {/* Other Subtasks */}
                           {displayedSubtasks.map((st) => (
                             <React.Fragment key={st.subtask.id}>
-                              <tr className="hover:bg-[#2a3647]/50 transition-colors">
-                                <td className="sticky left-[412px] z-20 bg-[#1a2332] border-2 border-white/20 px-4 py-3">
+                              <tr className={`hover:${colors.bgTertiary}/50 transition-colors`}>
+                                <td className={`sticky left-[412px] z-20 ${colors.bgSecondary} border-2 ${colors.border} px-4 py-3`}>
                                   <div className="flex items-center gap-2">
                                     {st.subSubtasks.length > 0 && (
                                       <button
                                         onClick={() => toggleSubtaskCollapse(st.subtask.id)}
-                                        className="text-white hover:text-sky-300 transition-transform"
+                                        className={`${colors.text} hover:text-sky-300 transition-transform`}
                                         title={collapsedSubtasks.has(st.subtask.id) ? 'Expand sub-subtasks' : 'Collapse sub-subtasks'}
                                       >
                                         {collapsedSubtasks.has(st.subtask.id) ? (
@@ -1142,11 +1142,11 @@ export const Dashboard: React.FC = () => {
                                     Add Sub-Subtask
                                   </button>
                                 </td>
-                                <td className={`sticky ${engineerLeadPosition} z-10 bg-[#1a2332] border-2 border-white/20 px-2 py-3`}>
+                                <td className={`sticky ${engineerLeadPosition} z-10 ${colors.bgSecondary} border-2 ${colors.border} px-2 py-3`}>
                                   <select disabled={!canEditTask(st.subtask)}
                                     value={st.subtask.assigned_to || ''}
                                     onChange={(e) => handleAssignmentChange(st.subtask.id, e.target.value || null)}
-                                    className="w-full bg-[#1a2332] border border-white/20 shadow-sm text-white text-sm rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className={`w-full ${colors.bgSecondary} border ${colors.border} shadow-sm ${colors.text} text-sm rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed`}
                                   >
                                     <option value="">Unassigned</option>
                                     {users.map(u => (
@@ -1159,7 +1159,7 @@ export const Dashboard: React.FC = () => {
                                 {dateRange.map(date => {
                                   const milestonesForDate = st.milestones.filter(m => m.milestone_date === date);
                                   return (
-                                    <td key={date} className="border border-white/5 px-2 py-2 bg-[#0f1624] align-top">
+                                    <td key={date} className={`border ${colors.border} px-2 py-2 ${colors.bg} align-top`}>
                                       <div className="space-y-1">
                                         {milestonesForDate.map(milestone => (
                                           <div
@@ -1186,7 +1186,7 @@ export const Dashboard: React.FC = () => {
                                               }
                                             }}
                                             onBlur={() => setOpenDropdown(null)}
-                                            className="w-full bg-[#1a2332] border border-white/20 shadow-sm text-white text-xs rounded px-1 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            className={`w-full ${colors.bgSecondary} border ${colors.border} shadow-sm ${colors.text} text-xs rounded px-1 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500`}
                                           >
                                             <option value="">Select...</option>
                                             {milestoneOptions.map(option => (
@@ -1196,7 +1196,7 @@ export const Dashboard: React.FC = () => {
                                         ) : (
                                           <button disabled={!canEditTask(st.subtask)}
                                             onClick={() => setOpenDropdown(`subtask-${st.subtask.id}-${date}`)}
-                                            className="w-6 h-6 bg-[#2a3647] hover:bg-[#3a4757] border border-white/10 text-white text-xs rounded flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className={`w-6 h-6 ${colors.bgTertiary} hover:${colors.bgSecondary} border ${colors.border} ${colors.text} text-xs rounded flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
                                           >
                                             +
                                           </button>
@@ -1207,10 +1207,10 @@ export const Dashboard: React.FC = () => {
                                 })}
                               </tr>
                               {!collapsedSubtasks.has(st.subtask.id) && st.subSubtasks.map(sst => (
-                                <tr key={sst.subSubtask.id} className="hover:bg-[#2a3647]/50 transition-colors bg-[#111827]">
-                                  <td className="sticky left-[412px] z-20 bg-[#1a2332] border-2 border-white/20 px-4 py-3 pl-8">
+                                <tr key={sst.subSubtask.id} className={`hover:${colors.bgTertiary}/50 transition-colors ${colors.bg}`}>
+                                  <td className={`sticky left-[412px] z-20 ${colors.bgSecondary} border-2 ${colors.border} px-4 py-3 pl-8`}>
                                     <div className="flex items-center gap-2">
-                                      <span className="text-slate-400">↳</span> {sst.subSubtask.name}
+                                      <span className={colors.textSecondary}>↳</span> {sst.subSubtask.name}
                                       <button disabled={!canEditTask(sst.subSubtask)}
                                         onClick={() => setShowEditSubSubtask({ subSubtaskId: sst.subSubtask.id, subSubtaskName: sst.subSubtask.name, parentSubtaskName: st.subtask.name })}
                                         className="text-sky-400 hover:text-sky-300 hover:scale-110 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -1227,11 +1227,11 @@ export const Dashboard: React.FC = () => {
                                       </button>
                                     </div>
                                   </td>
-                                  <td className={`sticky ${engineerLeadPosition} z-10 bg-[#1a2332] border-2 border-white/20 px-2 py-3`}>
+                                  <td className={`sticky ${engineerLeadPosition} z-10 ${colors.bgSecondary} border-2 ${colors.border} px-2 py-3`}>
                                     <select disabled={!canEditTask(sst.subSubtask)}
                                       value={sst.subSubtask.assigned_to || ''}
                                       onChange={(e) => handleSubSubtaskAssignmentChange(sst.subSubtask.id, e.target.value || null)}
-                                      className="w-full bg-[#1a2332] border border-white/20 shadow-sm text-white text-sm rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                      className={`w-full ${colors.bgSecondary} border ${colors.border} shadow-sm ${colors.text} text-sm rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed`}
                                     >
                                       <option value="">Unassigned</option>
                                       {users.map(u => (
@@ -1244,7 +1244,7 @@ export const Dashboard: React.FC = () => {
                                   {dateRange.map(date => {
                                     const milestonesForDate = sst.milestones.filter(m => m.milestone_date === date);
                                     return (
-                                      <td key={date} className="border border-white/5 px-2 py-2 bg-[#141b2a] align-top">
+                                      <td key={date} className={`border ${colors.border} px-2 py-2 ${colors.bgTertiary} align-top`}>
                                         <div className="space-y-1">
                                           {milestonesForDate.map(milestone => (
                                             <div
@@ -1271,7 +1271,7 @@ export const Dashboard: React.FC = () => {
                                                 }
                                               }}
                                               onBlur={() => setOpenDropdown(null)}
-                                              className="w-full bg-[#1a2332] border border-white/20 shadow-sm text-white text-xs rounded px-1 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                              className={`w-full ${colors.bgSecondary} border ${colors.border} shadow-sm ${colors.text} text-xs rounded px-1 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500`}
                                             >
                                               <option value="">Select...</option>
                                               {milestoneOptions.map(option => (
@@ -1281,7 +1281,7 @@ export const Dashboard: React.FC = () => {
                                           ) : (
                                             <button disabled={!canEditTask(sst.subSubtask)}
                                               onClick={() => setOpenDropdown(`subsubtask-${sst.subSubtask.id}-${date}`)}
-                                              className="w-6 h-6 bg-[#2a3647] hover:bg-[#3a4757] border border-white/10 text-white text-xs rounded flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                              className={`w-6 h-6 ${colors.bgTertiary} hover:${colors.bgSecondary} border ${colors.border} ${colors.text} text-xs rounded flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
                                             >
                                               +
                                             </button>
@@ -1301,7 +1301,7 @@ export const Dashboard: React.FC = () => {
                 })}
                 {groupedData.length === 0 && (
                   <tr>
-                    <td colSpan={4 + dateRange.length} className="text-start pl-[14%] py-8 text-slate-300 text-lg font-medium">
+                    <td colSpan={4 + dateRange.length} className={`text-start pl-[14%] py-8 ${colors.textSecondary} text-lg font-medium`}>
                       No tasks yet. Click "Add Task" to get started.
                     </td>
                   </tr>
