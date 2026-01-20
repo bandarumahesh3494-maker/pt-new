@@ -25,10 +25,13 @@ export const Dashboard: React.FC = () => {
   const isAdmin = userProfile?.role === 'admin';
 
   const hexToRgba = (hex: string, alpha: number) => {
+    if (!hex || typeof hex !== 'string') {
+      return `rgba(59, 130, 246, ${alpha || 0.15})`;
+    }
     const r = parseInt(hex.slice(1, 3), 16);
     const g = parseInt(hex.slice(3, 5), 16);
     const b = parseInt(hex.slice(5, 7), 16);
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    return `rgba(${r}, ${g}, ${b}, ${alpha || 0.15})`;
   };
 
   const [showAddTask, setShowAddTask] = useState(false);
