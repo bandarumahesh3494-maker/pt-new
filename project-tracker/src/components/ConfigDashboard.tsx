@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Plus, Trash2, Edit2, Save, X, UserPlus } from 'lucide-react';
+import { Settings, Plus, Trash2, CreditCard as Edit2, Save, X, UserPlus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useTheme } from '../contexts/ThemeContext';
 import { ThemeSelector } from './ThemeSelector';
