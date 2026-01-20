@@ -134,12 +134,14 @@ export const ConfigDashboard: React.FC = () => {
     try {
       const { error } = await supabase
         .from('app_config')
-        .update({
+        .upsert({
+          realm_id: userProfile?.realm_id,
+          config_key: 'milestone_options',
           config_value: milestoneOptions,
           updated_at: new Date().toISOString()
-        })
-        .eq('config_key', 'milestone_options')
-        .eq('realm_id', userProfile?.realm_id);
+        }, {
+          onConflict: 'realm_id,config_key'
+        });
 
       if (error) throw error;
     } catch (err) {
@@ -151,12 +153,14 @@ export const ConfigDashboard: React.FC = () => {
     try {
       const { error } = await supabase
         .from('app_config')
-        .update({
+        .upsert({
+          realm_id: userProfile?.realm_id,
+          config_key: 'row_colors',
           config_value: rowColors,
           updated_at: new Date().toISOString()
-        })
-        .eq('config_key', 'row_colors')
-        .eq('realm_id', userProfile?.realm_id);
+        }, {
+          onConflict: 'realm_id,config_key'
+        });
 
       if (error) throw error;
     } catch (err) {
@@ -166,26 +170,30 @@ export const ConfigDashboard: React.FC = () => {
 
   const saveCategoryColors = async () => {
     try {
-      const colorsError = await supabase
+      const { error: colorsError } = await supabase
         .from('app_config')
-        .update({
+        .upsert({
+          realm_id: userProfile?.realm_id,
+          config_key: 'category_colors',
           config_value: categoryColors,
           updated_at: new Date().toISOString()
-        })
-        .eq('config_key', 'category_colors')
-        .eq('realm_id', userProfile?.realm_id);
+        }, {
+          onConflict: 'realm_id,config_key'
+        });
 
-      const opacityError = await supabase
+      const { error: opacityError } = await supabase
         .from('app_config')
-        .update({
+        .upsert({
+          realm_id: userProfile?.realm_id,
+          config_key: 'category_opacity',
           config_value: categoryOpacity,
           updated_at: new Date().toISOString()
-        })
-        .eq('config_key', 'category_opacity')
-        .eq('realm_id', userProfile?.realm_id);
+        }, {
+          onConflict: 'realm_id,config_key'
+        });
 
-      if (colorsError.error) throw colorsError.error;
-      if (opacityError.error) throw opacityError.error;
+      if (colorsError) throw colorsError;
+      if (opacityError) throw opacityError;
     } catch (err) {
       console.error('Error saving category colors:', err);
     }
@@ -202,12 +210,14 @@ export const ConfigDashboard: React.FC = () => {
     try {
       const { error } = await supabase
         .from('app_config')
-        .update({
+        .upsert({
+          realm_id: userProfile?.realm_id,
+          config_key: 'milestone_options',
           config_value: updated,
           updated_at: new Date().toISOString()
-        })
-        .eq('config_key', 'milestone_options')
-        .eq('realm_id', userProfile?.realm_id);
+        }, {
+          onConflict: 'realm_id,config_key'
+        });
 
       if (error) throw error;
     } catch (err) {
@@ -228,12 +238,14 @@ export const ConfigDashboard: React.FC = () => {
     try {
       const { error } = await supabase
         .from('app_config')
-        .update({
+        .upsert({
+          realm_id: userProfile?.realm_id,
+          config_key: 'milestone_options',
           config_value: updated,
           updated_at: new Date().toISOString()
-        })
-        .eq('config_key', 'milestone_options')
-        .eq('realm_id', userProfile?.realm_id);
+        }, {
+          onConflict: 'realm_id,config_key'
+        });
 
       if (error) throw error;
     } catch (err) {
