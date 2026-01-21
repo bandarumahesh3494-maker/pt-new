@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QUICK REFERENCE</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            color: #333;
+        }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #34495e; border-bottom: 2px solid #95a5a6; padding-bottom: 8px; margin-top: 30px; }
+        h3 { color: #7f8c8d; }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        blockquote {
+            border-left: 4px solid #3498db;
+            padding-left: 20px;
+            margin-left: 0;
+            color: #555;
+        }
+        a { color: #3498db; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        @media print {
+            body { padding: 0; }
+            pre { page-break-inside: avoid; }
+            h1, h2, h3 { page-break-after: avoid; }
+        }
+    </style>
+</head>
+<body>
+<h1>Project Tracker Schema Auto-Migration - Quick Reference</h1>
+<h2>🚀 Quick Start</h2>
+<h3>Automatic (Recommended)</h3>
+<pre><code class="language-bash"># Schema is auto-checked and applied during deployment
+./multi_tenant_deploy.sh --deploy-only
+</code></pre>
+<h3>Manual</h3>
+<pre><code class="language-bash"># Run verification script directly
+bash frontend/project-tracker/verify-and-apply-schema.sh
+</code></pre>
+<h2>📁 Key Files</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>verify-and-apply-schema.sh</code></td>
+<td>Auto-migration script</td>
+</tr>
+<tr>
+<td><code>SCHEMA_VERIFICATION_README.md</code></td>
+<td>Full documentation</td>
+</tr>
+<tr>
+<td><code>SCHEMA_AUTO_MIGRATION_COMPLETE.md</code></td>
+<td>Implementation details</td>
+</tr>
+<tr>
+<td><code>QUICK_REFERENCE.md</code></td>
+<td>This file</td>
+</tr>
+<tr>
+<td><code>supabase/migrations/*.sql</code></td>
+<td>Migration SQL files</td>
+</tr>
+</tbody></table>
+<h2>✅ What Gets Checked</h2>
+<ul>
+<li><input checked="" disabled="" type="checkbox"> <code>tasks</code> table with <code>realm_id</code></li>
+<li><input checked="" disabled="" type="checkbox"> <code>subtasks</code> table with <code>realm_id</code></li>
+<li><input checked="" disabled="" type="checkbox"> <code>sub_subtasks</code> table with <code>realm_id</code></li>
+<li><input checked="" disabled="" type="checkbox"> <code>milestones</code> table with <code>realm_id</code></li>
+<li><input checked="" disabled="" type="checkbox"> <code>people</code> table</li>
+<li><input checked="" disabled="" type="checkbox"> <code>action_history</code> table with <code>realm_id</code></li>
+<li><input checked="" disabled="" type="checkbox"> <code>app_config</code> table with <code>realm_id</code></li>
+</ul>
+<h2>🔄 Migration Flow</h2>
+<pre><code>1. Check if tables exist
+   ↓
+2. Check if realm_id columns exist
+   ↓
+3. Determine action needed:
+   - All good → Skip
+   - Missing tables → Create
+   - Missing realm_id → Update
+   ↓
+4. Apply migrations in order
+   ↓
+5. Verify final state
+   ↓
+6. Report success/failure
+</code></pre>
+<h2>📋 Common Commands</h2>
+<h3>Check Database Tables</h3>
+<pre><code class="language-bash"># List all Project Tracker tables
+docker compose exec db psql -U postgres -d postgres -c &quot;\dt&quot;
+
+# Check specific table structure
+docker compose exec db psql -U postgres -d postgres -c &quot;\d tasks&quot;
+
+# Check for realm_id column
+docker compose exec db psql -U postgres -d postgres -c \
+  &quot;SELECT column_name FROM information_schema.columns WHERE table_name=&#39;tasks&#39;;&quot;
+</code></pre>
+<h3>Manual Migration</h3>
+<pre><code class="language-bash"># Apply specific migration
+docker compose exec -T db psql -U postgres -d postgres &lt; \
+  frontend/project-tracker/supabase/migrations/20251205012545_create_project_tracker_schema.sql
+
+# Apply all migrations
+for file in frontend/project-tracker/supabase/migrations/*.sql; do
+  docker compose exec -T db psql -U postgres -d postgres &lt; &quot;$file&quot;
+done
+</code></pre>
+<h3>Reset Schema</h3>
+<pre><code class="language-bash"># Drop all Project Tracker tables
+docker compose exec -T db psql -U postgres -d postgres &lt;&lt;EOF
+DROP TABLE IF EXISTS action_history CASCADE;
+DROP TABLE IF EXISTS sub_subtasks CASCADE;
+DROP TABLE IF EXISTS subtasks CASCADE;
+DROP TABLE IF EXISTS tasks CASCADE;
+DROP TABLE IF EXISTS milestones CASCADE;
+DROP TABLE IF EXISTS app_config CASCADE;
+EOF
+
+# Re-run verification to recreate
+bash frontend/project-tracker/verify-and-apply-schema.sh
+</code></pre>
+<h2>🎨 Output Colors</h2>
+<ul>
+<li>🟢 <strong>Green</strong> - Success</li>
+<li>🟡 <strong>Yellow</strong> - Warning or skipped</li>
+<li>🔴 <strong>Red</strong> - Error or failure</li>
+<li>🔵 <strong>Blue</strong> - Information</li>
+</ul>
+<h2>🐛 Troubleshooting</h2>
+<h3>Script Not Found</h3>
+<pre><code class="language-bash"># Ensure you&#39;re in project root
+pwd  # Should show .../project
+
+# Check if file exists
+ls -la frontend/project-tracker/verify-and-apply-schema.sh
+
+# Make executable if needed
+chmod +x frontend/project-tracker/verify-and-apply-schema.sh
+</code></pre>
+<h3>Database Not Running</h3>
+<pre><code class="language-bash"># Check Docker containers
+docker compose ps
+
+# Start database
+docker compose up -d db
+
+# Wait for database to be ready
+docker compose exec db pg_isready -U postgres
+</code></pre>
+<h3>Migration Failed</h3>
+<pre><code class="language-bash"># View database logs
+docker compose logs db --tail=50
+
+# Check migration file syntax
+cat frontend/project-tracker/supabase/migrations/FILENAME.sql
+
+# Try applying manually with verbose output
+docker compose exec -T db psql -U postgres -d postgres &lt; \
+  frontend/project-tracker/supabase/migrations/FILENAME.sql
+</code></pre>
+<h3>Permission Errors</h3>
+<pre><code class="language-bash"># Grant permissions to postgres user
+docker compose exec db psql -U postgres -d postgres &lt;&lt;EOF
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO postgres;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO postgres;
+GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO postgres;
+EOF
+</code></pre>
+<h2>📊 Verification Examples</h2>
+<h3>Check All Tables Exist</h3>
+<pre><code class="language-bash">docker compose exec db psql -U postgres -d postgres &lt;&lt;EOF
+SELECT table_name
+FROM information_schema.tables
+WHERE table_schema = &#39;public&#39;
+  AND table_name IN (&#39;tasks&#39;, &#39;subtasks&#39;, &#39;sub_subtasks&#39;,
+                     &#39;milestones&#39;, &#39;people&#39;, &#39;action_history&#39;, &#39;app_config&#39;)
+ORDER BY table_name;
+EOF
+</code></pre>
+<h3>Check realm_id Columns</h3>
+<pre><code class="language-bash">docker compose exec db psql -U postgres -d postgres &lt;&lt;EOF
+SELECT table_name, column_name
+FROM information_schema.columns
+WHERE table_schema = &#39;public&#39;
+  AND column_name = &#39;realm_id&#39;
+ORDER BY table_name;
+EOF
+</code></pre>
+<h3>Check RLS Policies</h3>
+<pre><code class="language-bash">docker compose exec db psql -U postgres -d postgres &lt;&lt;EOF
+SELECT tablename, policyname
+FROM pg_policies
+WHERE schemaname = &#39;public&#39;
+  AND tablename IN (&#39;tasks&#39;, &#39;subtasks&#39;, &#39;sub_subtasks&#39;,
+                    &#39;milestones&#39;, &#39;action_history&#39;, &#39;app_config&#39;)
+ORDER BY tablename, policyname;
+EOF
+</code></pre>
+<h3>Check Triggers</h3>
+<pre><code class="language-bash">docker compose exec db psql -U postgres -d postgres &lt;&lt;EOF
+SELECT trigger_name, event_object_table
+FROM information_schema.triggers
+WHERE trigger_schema = &#39;public&#39;
+  AND event_object_table IN (&#39;tasks&#39;, &#39;subtasks&#39;, &#39;sub_subtasks&#39;,
+                              &#39;milestones&#39;, &#39;action_history&#39;, &#39;app_config&#39;)
+ORDER BY event_object_table, trigger_name;
+EOF
+</code></pre>
+<h2>🔐 Security Check</h2>
+<pre><code class="language-bash"># Verify RLS is enabled
+docker compose exec db psql -U postgres -d postgres &lt;&lt;EOF
+SELECT tablename, rowsecurity
+FROM pg_tables
+WHERE schemaname = &#39;public&#39;
+  AND tablename IN (&#39;tasks&#39;, &#39;subtasks&#39;, &#39;sub_subtasks&#39;,
+                    &#39;milestones&#39;, &#39;action_history&#39;, &#39;app_config&#39;);
+EOF
+</code></pre>
+<p>Expected output: All tables should have <code>rowsecurity = true</code></p>
+<h2>🧪 Test Data</h2>
+<h3>Create Test Realm</h3>
+<pre><code class="language-sql">INSERT INTO realms (slug, name, is_superadmin_realm)
+VALUES (&#39;test-realm&#39;, &#39;Test Realm&#39;, false)
+RETURNING id;
+</code></pre>
+<h3>Create Test User in Realm</h3>
+<pre><code class="language-sql">-- Insert into auth.users first (via Supabase Auth API)
+-- Then create profile
+INSERT INTO profiles (id, email, role, realm_id)
+VALUES (
+  &#39;00000000-0000-0000-0000-000000000001&#39;,
+  &#39;test@example.com&#39;,
+  &#39;admin&#39;,
+  (SELECT id FROM realms WHERE slug = &#39;test-realm&#39;)
+);
+</code></pre>
+<h3>Create Test Task</h3>
+<pre><code class="language-sql">INSERT INTO tasks (name, category, realm_id, user_id)
+VALUES (
+  &#39;Test Task&#39;,
+  &#39;dev&#39;,
+  (SELECT id FROM realms WHERE slug = &#39;test-realm&#39;),
+  &#39;00000000-0000-0000-0000-000000000001&#39;
+);
+</code></pre>
+<h2>📝 Exit Codes</h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>0</code></td>
+<td>Success - all tables verified</td>
+</tr>
+<tr>
+<td><code>1</code></td>
+<td>Failure - migrations failed or tables missing</td>
+</tr>
+</tbody></table>
+<h2>🔗 Integration Points</h2>
+<h3>In multi_tenant_deploy.sh</h3>
+<pre><code class="language-bash"># Line ~1188: Project Tracker schema verification
+bash frontend/project-tracker/verify-and-apply-schema.sh
+</code></pre>
+<h3>Deployment Steps</h3>
+<pre><code>Step 1:   Start database
+Step 2:   Start auth service
+Step 3:   Apply migrations
+  ...
+  3.11.9: ⭐ Project Tracker Schema Verification ⭐
+  ...
+Step 4:   Start core services
+Step 5:   Start monitoring
+</code></pre>
+<h2>📚 Documentation Files</h2>
+<ul>
+<li><strong>SCHEMA_VERIFICATION_README.md</strong> - Complete guide (360 lines)</li>
+<li><strong>SCHEMA_AUTO_MIGRATION_COMPLETE.md</strong> - Implementation details (400 lines)</li>
+<li><strong>QUICK_REFERENCE.md</strong> - This file (cheat sheet)</li>
+<li><strong>REALM_QUICK_REFERENCE.md</strong> - Realm architecture guide</li>
+<li><strong>PROJECT_TRACKER_REALM_MIGRATION.md</strong> - Migration details</li>
+</ul>
+<h2>🎯 Key Features</h2>
+<ul>
+<li>✅ Automatic schema verification</li>
+<li>✅ Idempotent migrations</li>
+<li>✅ Realm-based multi-tenancy</li>
+<li>✅ RLS policy enforcement</li>
+<li>✅ Auto-population triggers</li>
+<li>✅ Clear error reporting</li>
+<li>✅ Zero manual intervention</li>
+<li>✅ Production ready</li>
+</ul>
+<h2>💡 Pro Tips</h2>
+<ol>
+<li><p><strong>Always run from project root</strong>: The script expects to be run from the project root directory</p>
+</li>
+<li><p><strong>Check logs on failure</strong>: Use <code>docker compose logs db --tail=50</code> to see detailed errors</p>
+</li>
+<li><p><strong>Test locally first</strong>: Use manual commands to test migrations before deploying</p>
+</li>
+<li><p><strong>Idempotent is safe</strong>: Running the script multiple times won&#39;t cause issues</p>
+</li>
+<li><p><strong>Use verbose mode</strong>: Add <code>-x</code> to bash for detailed execution: <code>bash -x verify-and-apply-schema.sh</code></p>
+</li>
+</ol>
+<h2>🚨 Important Notes</h2>
+<ul>
+<li>Script requires Docker and database to be running</li>
+<li>Uses <code>profiles</code> table (not <code>auth.users</code>) for foreign keys</li>
+<li>All tables must have <code>realm_id</code> for multi-tenancy</li>
+<li>RLS policies enforce realm isolation automatically</li>
+<li>Triggers auto-populate <code>realm_id</code> and <code>user_id</code></li>
+</ul>
+<h2>⚡ Quick Commands Reference</h2>
+<pre><code class="language-bash"># Run deployment with Project Tracker auto-migration
+./multi_tenant_deploy.sh --deploy-only
+
+# Run schema verification manually
+bash frontend/project-tracker/verify-and-apply-schema.sh
+
+# Check deployment logs
+docker compose logs -f
+
+# View database tables
+docker compose exec db psql -U postgres -d postgres -c &quot;\dt&quot;
+
+# Access database shell
+docker compose exec db psql -U postgres -d postgres
+
+# View Project Tracker logs
+docker compose logs project-tracker
+
+# Restart project tracker service
+docker compose restart project-tracker
+</code></pre>
+<h2>📞 Getting Help</h2>
+<ol>
+<li>Check <code>SCHEMA_VERIFICATION_README.md</code> for detailed documentation</li>
+<li>Review migration SQL files in <code>supabase/migrations/</code></li>
+<li>Check database logs: <code>docker compose logs db</code></li>
+<li>Verify Docker status: <code>docker compose ps</code></li>
+<li>Test manually: Run SQL queries directly</li>
+</ol>
+<hr>
+<p><strong>Remember</strong>: The script runs automatically during deployment. Manual execution is only needed for testing or troubleshooting!</p>
+
+<footer style="margin-top: 60px; padding-top: 20px; border-top: 1px solid #ddd; color: #888; text-align: center;">
+    <p>Generated on 1/21/2026 | <a href="index.html">Back to Index</a></p>
+</footer>
+</body>
+</html>

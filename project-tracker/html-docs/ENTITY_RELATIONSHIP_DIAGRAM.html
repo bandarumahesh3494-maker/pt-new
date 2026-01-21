@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENTITY RELATIONSHIP DIAGRAM</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            color: #333;
+        }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #34495e; border-bottom: 2px solid #95a5a6; padding-bottom: 8px; margin-top: 30px; }
+        h3 { color: #7f8c8d; }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        blockquote {
+            border-left: 4px solid #3498db;
+            padding-left: 20px;
+            margin-left: 0;
+            color: #555;
+        }
+        a { color: #3498db; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        @media print {
+            body { padding: 0; }
+            pre { page-break-inside: avoid; }
+            h1, h2, h3 { page-break-after: avoid; }
+        }
+    </style>
+</head>
+<body>
+<h1>Project Tracker - Entity Relationship Diagram</h1>
+<h2>Database Schema Overview</h2>
+<p>This document describes the complete database schema including tables, relationships, and constraints.</p>
+<hr>
+<h2>ER Diagram (Mermaid)</h2>
+<pre><code class="language-mermaid">erDiagram
+    AUTH_USERS ||--o{ PROFILES : &quot;has profile&quot;
+
+    REALMS ||--o{ PROFILES : &quot;contains&quot;
+    REALMS ||--o{ TASKS : &quot;contains&quot;
+    REALMS ||--o{ SUBTASKS : &quot;contains&quot;
+    REALMS ||--o{ SUB_SUBTASKS : &quot;contains&quot;
+    REALMS ||--o{ MILESTONES : &quot;contains&quot;
+    REALMS ||--o{ CONFIG : &quot;contains&quot;
+    REALMS ||--o{ ACTION_HISTORY : &quot;contains&quot;
+    REALMS ||--o{ TEMP_TASKS : &quot;contains&quot;
+
+    PROFILES ||--o{ TASKS : &quot;created by&quot;
+    PROFILES ||--o{ SUBTASKS : &quot;created by&quot;
+    PROFILES ||--o{ SUBTASKS : &quot;assigned to&quot;
+    PROFILES ||--o{ SUB_SUBTASKS : &quot;created by&quot;
+    PROFILES ||--o{ SUB_SUBTASKS : &quot;assigned to&quot;
+    PROFILES ||--o{ MILESTONES : &quot;created by&quot;
+    PROFILES ||--o{ ACTION_HISTORY : &quot;performed by&quot;
+    PROFILES ||--o{ TEMP_TASKS : &quot;created by&quot;
+
+    TASKS ||--o{ SUBTASKS : &quot;has many&quot;
+    SUBTASKS ||--o{ SUB_SUBTASKS : &quot;has many&quot;
+    SUBTASKS ||--o{ MILESTONES : &quot;has milestones&quot;
+    SUB_SUBTASKS ||--o{ MILESTONES : &quot;has milestones&quot;
+
+    AUTH_USERS {
+        uuid id PK
+        string email
+        string encrypted_password
+        timestamp created_at
+    }
+
+    REALMS {
+        uuid id PK
+        text name
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    PROFILES {
+        uuid id PK,FK
+        text email
+        text full_name
+        text role
+        uuid realm_id FK
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    TASKS {
+        uuid id PK
+        uuid realm_id FK
+        uuid user_id FK
+        uuid created_by FK
+        text name
+        text category
+        int priority
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    SUBTASKS {
+        uuid id PK
+        uuid realm_id FK
+        uuid task_id FK
+        uuid user_id FK
+        uuid created_by FK
+        text name
+        uuid assigned_to FK
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    SUB_SUBTASKS {
+        uuid id PK
+        uuid realm_id FK
+        uuid subtask_id FK
+        uuid user_id FK
+        uuid created_by FK
+        text name
+        int order_index
+        uuid assigned_to FK
+        timestamp created_at
+    }
+
+    MILESTONES {
+        uuid id PK
+        uuid realm_id FK
+        uuid user_id FK
+        uuid created_by FK
+        uuid subtask_id FK
+        uuid sub_subtask_id FK
+        date milestone_date
+        text milestone_text
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    CONFIG {
+        uuid id PK
+        uuid realm_id FK
+        uuid user_id FK
+        text key
+        jsonb value
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    ACTION_HISTORY {
+        uuid id PK
+        uuid realm_id FK
+        uuid user_id FK
+        text action_type
+        text entity_type
+        uuid entity_id
+        jsonb details
+        timestamp created_at
+    }
+
+    TEMP_TASKS {
+        uuid id PK
+        uuid realm_id FK
+        uuid user_id FK
+        uuid created_by FK
+        text name
+        text priority
+        text status
+        text assigned_byname
+        text created_byname
+        timestamp created_at
+        timestamp updated_at
+    }
+</code></pre>
+<hr>
+<h2>Table Descriptions</h2>
+<h3>Core Tables</h3>
+<h4>1. <strong>auth.users</strong> (Supabase Managed)</h4>
+<p>Built-in Supabase authentication table.</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Constraints</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>id</td>
+<td>uuid</td>
+<td>PRIMARY KEY</td>
+<td>Unique user identifier</td>
+</tr>
+<tr>
+<td>email</td>
+<td>text</td>
+<td>UNIQUE, NOT NULL</td>
+<td>User email address</td>
+</tr>
+<tr>
+<td>encrypted_password</td>
+<td>text</td>
+<td></td>
+<td>Encrypted password hash</td>
+</tr>
+<tr>
+<td>created_at</td>
+<td>timestamptz</td>
+<td>DEFAULT now()</td>
+<td>Account creation timestamp</td>
+</tr>
+</tbody></table>
+<hr>
+<h4>2. <strong>realms</strong></h4>
+<p>Organizations or workspaces that contain users and data.</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Constraints</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>id</td>
+<td>uuid</td>
+<td>PRIMARY KEY</td>
+<td>Unique realm identifier</td>
+</tr>
+<tr>
+<td>name</td>
+<td>text</td>
+<td>NOT NULL</td>
+<td>Realm name</td>
+</tr>
+<tr>
+<td>created_at</td>
+<td>timestamptz</td>
+<td>DEFAULT now()</td>
+<td>Creation timestamp</td>
+</tr>
+<tr>
+<td>updated_at</td>
+<td>timestamptz</td>
+<td>DEFAULT now()</td>
+<td>Last update timestamp</td>
+</tr>
+</tbody></table>
+<p><strong>Relationships:</strong></p>
+<ul>
+<li>One-to-Many with <code>profiles</code></li>
+<li>One-to-Many with all project tables</li>
+</ul>
+<p><strong>RLS Policies:</strong></p>
+<ul>
+<li>Users can view their own realm</li>
+<li>Users can insert realms</li>
+<li>Admins can update their realm</li>
+</ul>
+<hr>
+<h4>3. <strong>profiles</strong></h4>
+<p>Extended user information linked to auth.users.</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Constraints</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>id</td>
+<td>uuid</td>
+<td>PRIMARY KEY, FK → auth.users(id)</td>
+<td>User ID (same as auth.users)</td>
+</tr>
+<tr>
+<td>email</td>
+<td>text</td>
+<td>NOT NULL</td>
+<td>User email</td>
+</tr>
+<tr>
+<td>full_name</td>
+<td>text</td>
+<td></td>
+<td>User&#39;s full name</td>
+</tr>
+<tr>
+<td>role</td>
+<td>text</td>
+<td>DEFAULT &#39;user&#39;</td>
+<td>User role in realm</td>
+</tr>
+<tr>
+<td>realm_id</td>
+<td>uuid</td>
+<td>FK → realms(id) ON DELETE CASCADE</td>
+<td>Associated realm</td>
+</tr>
+<tr>
+<td>created_at</td>
+<td>timestamptz</td>
+<td>DEFAULT now()</td>
+<td>Profile creation time</td>
+</tr>
+<tr>
+<td>updated_at</td>
+<td>timestamptz</td>
+<td>DEFAULT now()</td>
+<td>Last update time</td>
+</tr>
+</tbody></table>
+<p><strong>Roles:</strong></p>
+<ul>
+<li><code>owner</code>: Full control</li>
+<li><code>realm_admin</code>: Admin privileges</li>
+<li><code>admin</code>: Management privileges</li>
+<li><code>user</code>: Standard access</li>
+</ul>
+<p><strong>Relationships:</strong></p>
+<ul>
+<li>One-to-One with <code>auth.users</code></li>
+<li>Many-to-One with <code>realms</code></li>
+<li>One-to-Many with <code>tasks</code>, <code>subtasks</code>, <code>sub_subtasks</code></li>
+</ul>
+<p><strong>RLS Policies:</strong></p>
+<ul>
+<li>Users can view profiles in their realm</li>
+<li>Users can insert their own profile</li>
+<li>Users can update their own profile</li>
+</ul>
+<hr>
+<h3>Project Management Tables</h3>
+<h4>4. <strong>tasks</strong></h4>
+<p>Top-level work items.</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Constraints</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>id</td>
+<td>uuid</td>
+<td>PRIMARY KEY</td>
+<td>Unique task identifier</td>
+</tr>
+<tr>
+<td>realm_id</td>
+<td>uuid</td>
+<td>FK → realms(id) ON DELETE CASCADE</td>
+<td>Owning realm</td>
+</tr>
+<tr>
+<td>user_id</td>
+<td>uuid</td>
+<td>FK → profiles(id)</td>
+<td>Associated user</td>
+</tr>
+<tr>
+<td>created_by</td>
+<td>uuid</td>
+<td>FK → profiles(id)</td>
+<td>Creator</td>
+</tr>
+<tr>
+<td>name</td>
+<td>text</td>
+<td>NOT NULL</td>
+<td>Task name</td>
+</tr>
+<tr>
+<td>category</td>
+<td>text</td>
+<td>NOT NULL, CHECK</td>
+<td>Category (dev/test/infra/support)</td>
+</tr>
+<tr>
+<td>priority</td>
+<td>int</td>
+<td>DEFAULT 2, CHECK (1-3)</td>
+<td>Priority level</td>
+</tr>
+<tr>
+<td>created_at</td>
+<td>timestamptz</td>
+<td>DEFAULT now()</td>
+<td>Creation time</td>
+</tr>
+<tr>
+<td>updated_at</td>
+<td>timestamptz</td>
+<td>DEFAULT now()</td>
+<td>Last update</td>
+</tr>
+</tbody></table>
+<p><strong>Categories:</strong></p>
+<ul>
+<li><code>dev</code>: Development tasks</li>
+<li><code>test</code>: Testing tasks</li>
+<li><code>infra</code>: Infrastructure tasks</li>
+<li><code>support</code>: Support tasks</li>
+</ul>
+<p><strong>Priority Levels:</strong></p>
+<ul>
+<li>1: High</li>
+<li>2: Medium (default)</li>
+<li>3: Low</li>
+</ul>
+<p><strong>Relationships:</strong></p>
+<ul>
+<li>Many-to-One with <code>realms</code></li>
+<li>One-to-Many with <code>subtasks</code></li>
+</ul>
+<p><strong>RLS Policies:</strong></p>
+<ul>
+<li>Realm-based isolation (all CRUD operations)</li>
+</ul>
+<p><strong>Triggers:</strong></p>
+<ul>
+<li><code>trg_tasks_realm</code>: Auto-populate realm_id and user_id</li>
+</ul>
+<hr>
+<h4>5. <strong>subtasks</strong></h4>
+<p>Second-level breakdown of tasks.</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Constraints</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>id</td>
+<td>uuid</td>
+<td>PRIMARY KEY</td>
+<td>Unique subtask identifier</td>
+</tr>
+<tr>
+<td>realm_id</td>
+<td>uuid</td>
+<td>FK → realms(id) ON DELETE CASCADE</td>
+<td>Owning realm</td>
+</tr>
+<tr>
+<td>task_id</td>
+<td>uuid</td>
+<td>FK → tasks(id) ON DELETE CASCADE</td>
+<td>Parent task</td>
+</tr>
+<tr>
+<td>user_id</td>
+<td>uuid</td>
+<td>FK → profiles(id)</td>
+<td>Associated user</td>
+</tr>
+<tr>
+<td>created_by</td>
+<td>uuid</td>
+<td>FK → profiles(id)</td>
+<td>Creator</td>
+</tr>
+<tr>
+<td>name</td>
+<td>text</td>
+<td>NOT NULL</td>
+<td>Subtask name</td>
+</tr>
+<tr>
+<td>assigned_to</td>
+<td>uuid</td>
+<td>FK → profiles(id)</td>
+<td>Assigned engineer</td>
+</tr>
+<tr>
+<td>created_at</td>
+<td>timestamptz</td>
+<td>DEFAULT now()</td>
+<td>Creation time</td>
+</tr>
+<tr>
+<td>updated_at</td>
+<td>timestamptz</td>
+<td>DEFAULT now()</td>
+<td>Last update</td>
+</tr>
+</tbody></table>
+<p><strong>Relationships:</strong></p>
+<ul>
+<li>Many-to-One with <code>tasks</code></li>
+<li>Many-to-One with <code>realms</code></li>
+<li>One-to-Many with <code>sub_subtasks</code></li>
+<li>One-to-Many with <code>milestones</code></li>
+</ul>
+<p><strong>RLS Policies:</strong></p>
+<ul>
+<li>Realm-based isolation (all CRUD operations)</li>
+</ul>
+<p><strong>Triggers:</strong></p>
+<ul>
+<li><code>trg_subtasks_realm</code>: Auto-populate realm_id and user_id</li>
+</ul>
+<hr>
+<h4>6. <strong>sub_subtasks</strong></h4>
+<p>Third-level granular work items.</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Constraints</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>id</td>
+<td>uuid</td>
+<td>PRIMARY KEY</td>
+<td>Unique identifier</td>
+</tr>
+<tr>
+<td>realm_id</td>
+<td>uuid</td>
+<td>FK → realms(id) ON DELETE CASCADE</td>
+<td>Owning realm</td>
+</tr>
+<tr>
+<td>subtask_id</td>
+<td>uuid</td>
+<td>FK → subtasks(id) ON DELETE CASCADE</td>
+<td>Parent subtask</td>
+</tr>
+<tr>
+<td>user_id</td>
+<td>uuid</td>
+<td>FK → profiles(id)</td>
+<td>Associated user</td>
+</tr>
+<tr>
+<td>created_by</td>
+<td>uuid</td>
+<td>FK → profiles(id)</td>
+<td>Creator</td>
+</tr>
+<tr>
+<td>name</td>
+<td>text</td>
+<td>NOT NULL</td>
+<td>Sub-subtask name</td>
+</tr>
+<tr>
+<td>order_index</td>
+<td>int</td>
+<td>DEFAULT 0</td>
+<td>Display order</td>
+</tr>
+<tr>
+<td>assigned_to</td>
+<td>uuid</td>
+<td>FK → profiles(id)</td>
+<td>Assigned engineer</td>
+</tr>
+<tr>
+<td>created_at</td>
+<td>timestamptz</td>
+<td>DEFAULT now()</td>
+<td>Creation time</td>
+</tr>
+</tbody></table>
+<p><strong>Relationships:</strong></p>
+<ul>
+<li>Many-to-One with <code>subtasks</code></li>
+<li>Many-to-One with <code>realms</code></li>
+<li>One-to-Many with <code>milestones</code></li>
+</ul>
+<p><strong>RLS Policies:</strong></p>
+<ul>
+<li>Realm-based isolation (all CRUD operations)</li>
+</ul>
+<p><strong>Triggers:</strong></p>
+<ul>
+<li><code>trg_sub_subtasks_realm</code>: Auto-populate realm_id and user_id</li>
+</ul>
+<hr>
+<h4>7. <strong>milestones</strong></h4>
+<p>Date-based goals and deliverables.</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Constraints</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>id</td>
+<td>uuid</td>
+<td>PRIMARY KEY</td>
+<td>Unique identifier</td>
+</tr>
+<tr>
+<td>realm_id</td>
+<td>uuid</td>
+<td>FK → realms(id)</td>
+<td>Owning realm</td>
+</tr>
+<tr>
+<td>user_id</td>
+<td>uuid</td>
+<td>FK → profiles(id)</td>
+<td>Associated user</td>
+</tr>
+<tr>
+<td>created_by</td>
+<td>uuid</td>
+<td>FK → profiles(id)</td>
+<td>Creator</td>
+</tr>
+<tr>
+<td>subtask_id</td>
+<td>uuid</td>
+<td>FK → subtasks(id)</td>
+<td>Associated subtask (optional)</td>
+</tr>
+<tr>
+<td>sub_subtask_id</td>
+<td>uuid</td>
+<td>FK → sub_subtasks(id)</td>
+<td>Associated sub-subtask (optional)</td>
+</tr>
+<tr>
+<td>milestone_date</td>
+<td>date</td>
+<td>NOT NULL</td>
+<td>Target date</td>
+</tr>
+<tr>
+<td>milestone_text</td>
+<td>text</td>
+<td>NOT NULL</td>
+<td>Milestone description</td>
+</tr>
+<tr>
+<td>created_at</td>
+<td>timestamptz</td>
+<td>DEFAULT now()</td>
+<td>Creation time</td>
+</tr>
+<tr>
+<td>updated_at</td>
+<td>timestamptz</td>
+<td>DEFAULT now()</td>
+<td>Last update</td>
+</tr>
+</tbody></table>
+<p><strong>Constraints:</strong></p>
+<ul>
+<li>CHECK: Milestone must belong to either subtask OR sub_subtask (not both, not neither)</li>
+</ul>
+<p><strong>Relationships:</strong></p>
+<ul>
+<li>Many-to-One with <code>subtasks</code> (optional)</li>
+<li>Many-to-One with <code>sub_subtasks</code> (optional)</li>
+<li>Many-to-One with <code>realms</code></li>
+</ul>
+<p><strong>RLS Policies:</strong></p>
+<ul>
+<li>Realm-based isolation (all CRUD operations)</li>
+</ul>
+<p><strong>Triggers:</strong></p>
+<ul>
+<li><code>trg_milestones_realm</code>: Auto-populate realm_id and user_id</li>
+</ul>
+<hr>
+<h3>Configuration &amp; Audit Tables</h3>
+<h4>8. <strong>config</strong></h4>
+<p>Realm-wide configuration settings.</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Constraints</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>id</td>
+<td>uuid</td>
+<td>PRIMARY KEY</td>
+<td>Unique identifier</td>
+</tr>
+<tr>
+<td>realm_id</td>
+<td>uuid</td>
+<td>FK → realms(id) ON DELETE CASCADE</td>
+<td>Owning realm</td>
+</tr>
+<tr>
+<td>user_id</td>
+<td>uuid</td>
+<td>FK → profiles(id)</td>
+<td>Associated user</td>
+</tr>
+<tr>
+<td>key</td>
+<td>text</td>
+<td>NOT NULL</td>
+<td>Config key</td>
+</tr>
+<tr>
+<td>value</td>
+<td>jsonb</td>
+<td>DEFAULT &#39;{}&#39;</td>
+<td>Config value (JSON)</td>
+</tr>
+<tr>
+<td>created_at</td>
+<td>timestamptz</td>
+<td>DEFAULT now()</td>
+<td>Creation time</td>
+</tr>
+<tr>
+<td>updated_at</td>
+<td>timestamptz</td>
+<td>DEFAULT now()</td>
+<td>Last update</td>
+</tr>
+</tbody></table>
+<p><strong>Constraints:</strong></p>
+<ul>
+<li>UNIQUE(realm_id, key): One config per key per realm</li>
+</ul>
+<p><strong>Common Config Keys:</strong></p>
+<ul>
+<li><code>theme</code>: UI theme settings</li>
+<li><code>category_colors</code>: Task category color mappings</li>
+<li><code>category_opacity</code>: Color transparency settings</li>
+</ul>
+<p><strong>RLS Policies:</strong></p>
+<ul>
+<li>Realm-based isolation (all CRUD operations)</li>
+</ul>
+<hr>
+<h4>9. <strong>action_history</strong></h4>
+<p>Audit log of all user actions.</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Constraints</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>id</td>
+<td>uuid</td>
+<td>PRIMARY KEY</td>
+<td>Unique identifier</td>
+</tr>
+<tr>
+<td>realm_id</td>
+<td>uuid</td>
+<td>FK → realms(id) ON DELETE CASCADE</td>
+<td>Owning realm</td>
+</tr>
+<tr>
+<td>user_id</td>
+<td>uuid</td>
+<td>FK → profiles(id)</td>
+<td>User who performed action</td>
+</tr>
+<tr>
+<td>action_type</td>
+<td>text</td>
+<td>NOT NULL</td>
+<td>Type of action</td>
+</tr>
+<tr>
+<td>entity_type</td>
+<td>text</td>
+<td>NOT NULL</td>
+<td>Entity affected</td>
+</tr>
+<tr>
+<td>entity_id</td>
+<td>uuid</td>
+<td></td>
+<td>ID of affected entity</td>
+</tr>
+<tr>
+<td>details</td>
+<td>jsonb</td>
+<td>DEFAULT &#39;{}&#39;</td>
+<td>Action details (JSON)</td>
+</tr>
+<tr>
+<td>created_at</td>
+<td>timestamptz</td>
+<td>DEFAULT now()</td>
+<td>Action timestamp</td>
+</tr>
+</tbody></table>
+<p><strong>Action Types:</strong></p>
+<ul>
+<li><code>create</code>: Entity creation</li>
+<li><code>update</code>: Entity modification</li>
+<li><code>delete</code>: Entity deletion</li>
+</ul>
+<p><strong>Entity Types:</strong></p>
+<ul>
+<li><code>task</code>, <code>subtask</code>, <code>sub_subtask</code>, <code>milestone</code>, <code>config</code></li>
+</ul>
+<p><strong>RLS Policies:</strong></p>
+<ul>
+<li>Users can view history in their realm</li>
+<li>Users can insert history records</li>
+</ul>
+<hr>
+<h4>10. <strong>temp_tasks</strong></h4>
+<p>Temporary task storage before formal assignment.</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Constraints</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>id</td>
+<td>uuid</td>
+<td>PRIMARY KEY</td>
+<td>Unique identifier</td>
+</tr>
+<tr>
+<td>realm_id</td>
+<td>uuid</td>
+<td>FK → realms(id) ON DELETE CASCADE</td>
+<td>Owning realm</td>
+</tr>
+<tr>
+<td>user_id</td>
+<td>uuid</td>
+<td>FK → profiles(id)</td>
+<td>Associated user</td>
+</tr>
+<tr>
+<td>created_by</td>
+<td>uuid</td>
+<td>FK → profiles(id)</td>
+<td>Creator</td>
+</tr>
+<tr>
+<td>name</td>
+<td>text</td>
+<td>NOT NULL</td>
+<td>Task name</td>
+</tr>
+<tr>
+<td>priority</td>
+<td>text</td>
+<td></td>
+<td>Priority description</td>
+</tr>
+<tr>
+<td>status</td>
+<td>text</td>
+<td>DEFAULT &#39;draft&#39;</td>
+<td>Task status</td>
+</tr>
+<tr>
+<td>assigned_byname</td>
+<td>text</td>
+<td></td>
+<td>Name of assigner</td>
+</tr>
+<tr>
+<td>created_byname</td>
+<td>text</td>
+<td></td>
+<td>Name of creator</td>
+</tr>
+<tr>
+<td>created_at</td>
+<td>timestamptz</td>
+<td>DEFAULT now()</td>
+<td>Creation time</td>
+</tr>
+<tr>
+<td>updated_at</td>
+<td>timestamptz</td>
+<td>DEFAULT now()</td>
+<td>Last update</td>
+</tr>
+</tbody></table>
+<p><strong>Statuses:</strong></p>
+<ul>
+<li><code>draft</code>: Initial state</li>
+<li><code>pending</code>: Awaiting approval</li>
+<li><code>approved</code>: Ready for conversion</li>
+<li><code>rejected</code>: Not accepted</li>
+</ul>
+<p><strong>RLS Policies:</strong></p>
+<ul>
+<li>Realm-based isolation</li>
+<li>Users can only insert their own temp_tasks</li>
+</ul>
+<hr>
+<h2>Database Functions</h2>
+<h3>1. <strong>get_user_realm_id()</strong></h3>
+<p>Returns the realm_id for the currently authenticated user.</p>
+<pre><code class="language-sql">CREATE OR REPLACE FUNCTION get_user_realm_id()
+RETURNS uuid AS $$
+BEGIN
+  RETURN (
+    SELECT realm_id
+    FROM profiles
+    WHERE id = auth.uid()
+    LIMIT 1
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
+</code></pre>
+<p><strong>Usage:</strong> Used in all RLS policies to filter data by realm.</p>
+<hr>
+<h3>2. <strong>auto_populate_realm_and_user()</strong></h3>
+<p>Trigger function to automatically populate realm_id, user_id, and created_by on INSERT.</p>
+<pre><code class="language-sql">CREATE OR REPLACE FUNCTION auto_populate_realm_and_user()
+RETURNS TRIGGER AS $$
+DECLARE
+  current_realm uuid;
+BEGIN
+  current_realm := get_user_realm_id();
+
+  IF current_realm IS NULL THEN
+    RAISE EXCEPTION &#39;User does not belong to any realm&#39;;
+  END IF;
+
+  NEW.realm_id := current_realm;
+  NEW.user_id := auth.uid();
+  NEW.created_by := auth.uid();
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+</code></pre>
+<p><strong>Applied To:</strong></p>
+<ul>
+<li>tasks</li>
+<li>subtasks</li>
+<li>sub_subtasks</li>
+<li>milestones</li>
+</ul>
+<hr>
+<h2>Indexes</h2>
+<p>Recommended indexes for optimal query performance:</p>
+<pre><code class="language-sql">-- Tasks
+CREATE INDEX idx_tasks_realm_id ON tasks(realm_id);
+CREATE INDEX idx_tasks_category ON tasks(category);
+CREATE INDEX idx_tasks_created_at ON tasks(created_at);
+
+-- Subtasks
+CREATE INDEX idx_subtasks_task_id ON subtasks(task_id);
+CREATE INDEX idx_subtasks_realm_id ON subtasks(realm_id);
+CREATE INDEX idx_subtasks_assigned_to ON subtasks(assigned_to);
+
+-- Sub-subtasks
+CREATE INDEX idx_sub_subtasks_subtask_id ON sub_subtasks(subtask_id);
+CREATE INDEX idx_sub_subtasks_realm_id ON sub_subtasks(realm_id);
+CREATE INDEX idx_sub_subtasks_assigned_to ON sub_subtasks(assigned_to);
+
+-- Milestones
+CREATE INDEX idx_milestones_subtask_id ON milestones(subtask_id);
+CREATE INDEX idx_milestones_sub_subtask_id ON milestones(sub_subtask_id);
+CREATE INDEX idx_milestones_date ON milestones(milestone_date);
+
+-- Action History
+CREATE INDEX idx_action_history_created_at ON action_history(created_at DESC);
+CREATE INDEX idx_action_history_user_id ON action_history(user_id);
+</code></pre>
+<hr>
+<h2>Cascade Delete Behavior</h2>
+<h3>When a Realm is Deleted:</h3>
+<ul>
+<li>All profiles in realm are deleted</li>
+<li>All tasks, subtasks, sub-subtasks are deleted</li>
+<li>All milestones are deleted</li>
+<li>All config entries are deleted</li>
+<li>All action history is deleted</li>
+</ul>
+<h3>When a Task is Deleted:</h3>
+<ul>
+<li>All subtasks are deleted (CASCADE)</li>
+<li>All sub-subtasks are deleted (CASCADE via subtasks)</li>
+<li>All related milestones remain (unless explicitly deleted)</li>
+</ul>
+<h3>When a Subtask is Deleted:</h3>
+<ul>
+<li>All sub-subtasks are deleted (CASCADE)</li>
+<li>All subtask milestones remain orphaned (need manual cleanup)</li>
+</ul>
+<h3>When a User (Profile) is Deleted:</h3>
+<ul>
+<li>Associated auth.users record is deleted (CASCADE)</li>
+<li>Tasks/subtasks created_by and assigned_to become NULL</li>
+<li>Action history records remain for audit trail</li>
+</ul>
+<hr>
+<h2>Data Integrity Rules</h2>
+<ol>
+<li><strong>Realm Isolation</strong>: All data must belong to exactly one realm</li>
+<li><strong>User Realm Consistency</strong>: Users can only create/modify data in their realm</li>
+<li><strong>Hierarchical Integrity</strong>: Tasks → Subtasks → Sub-subtasks must maintain parent-child relationships</li>
+<li><strong>Milestone Exclusivity</strong>: Milestones belong to either subtask OR sub-subtask, never both</li>
+<li><strong>Category Validation</strong>: Tasks must have valid category (dev/test/infra/support)</li>
+<li><strong>Priority Range</strong>: Task priority must be between 1 and 3</li>
+</ol>
+
+<footer style="margin-top: 60px; padding-top: 20px; border-top: 1px solid #ddd; color: #888; text-align: center;">
+    <p>Generated on 1/21/2026 | <a href="index.html">Back to Index</a></p>
+</footer>
+</body>
+</html>

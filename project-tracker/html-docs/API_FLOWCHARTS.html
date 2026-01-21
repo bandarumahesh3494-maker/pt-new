@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API FLOWCHARTS</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            color: #333;
+        }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #34495e; border-bottom: 2px solid #95a5a6; padding-bottom: 8px; margin-top: 30px; }
+        h3 { color: #7f8c8d; }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        blockquote {
+            border-left: 4px solid #3498db;
+            padding-left: 20px;
+            margin-left: 0;
+            color: #555;
+        }
+        a { color: #3498db; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        @media print {
+            body { padding: 0; }
+            pre { page-break-inside: avoid; }
+            h1, h2, h3 { page-break-after: avoid; }
+        }
+    </style>
+</head>
+<body>
+<h1>Project Tracker - API Flowcharts</h1>
+<h2>Overview</h2>
+<p>This document provides visual flowcharts for key API operations in the Project Tracker system, showing the complete request-response flow including authentication, authorization, and data processing.</p>
+<hr>
+<h2>1. User Authentication Flow</h2>
+<h3>Sign Up Flow</h3>
+<pre><code class="language-mermaid">sequenceDiagram
+    participant Client
+    participant Supabase Auth
+    participant PostgreSQL
+    participant RLS Engine
+
+    Client-&gt;&gt;Supabase Auth: POST /auth/v1/signup
+    Note over Client,Supabase Auth: {email, password}
+
+    Supabase Auth-&gt;&gt;Supabase Auth: Validate email format
+    Supabase Auth-&gt;&gt;Supabase Auth: Hash password
+    Supabase Auth-&gt;&gt;PostgreSQL: Insert into auth.users
+    PostgreSQL--&gt;&gt;Supabase Auth: User created
+
+    Supabase Auth-&gt;&gt;Supabase Auth: Generate JWT token
+    Supabase Auth--&gt;&gt;Client: Return tokens + user
+    Note over Supabase Auth,Client: {access_token, refresh_token, user}
+
+    Client-&gt;&gt;PostgreSQL: Create profile (auto-triggered)
+    Note over Client,PostgreSQL: Realm assignment happens here
+</code></pre>
+<hr>
+<h3>Sign In Flow</h3>
+<pre><code class="language-mermaid">sequenceDiagram
+    participant Client
+    participant Supabase Auth
+    participant PostgreSQL
+
+    Client-&gt;&gt;Supabase Auth: POST /auth/v1/token
+    Note over Client,Supabase Auth: {email, password}
+
+    Supabase Auth-&gt;&gt;PostgreSQL: Query auth.users
+    PostgreSQL--&gt;&gt;Supabase Auth: User record
+
+    Supabase Auth-&gt;&gt;Supabase Auth: Verify password hash
+
+    alt Password Valid
+        Supabase Auth-&gt;&gt;Supabase Auth: Generate JWT
+        Supabase Auth--&gt;&gt;Client: Return tokens + user
+        Note over Supabase Auth,Client: {access_token, refresh_token}
+    else Password Invalid
+        Supabase Auth--&gt;&gt;Client: 401 Invalid credentials
+    end
+</code></pre>
+<hr>
+<h2>2. Task Creation Flow</h2>
+<h3>Create Task with Realm Isolation</h3>
+<pre><code class="language-mermaid">sequenceDiagram
+    participant Client
+    participant PostgREST API
+    participant RLS Engine
+    participant get_user_realm_id()
+    participant Trigger
+    participant PostgreSQL
+    participant Realtime Server
+
+    Client-&gt;&gt;PostgREST API: POST /rest/v1/tasks
+    Note over Client,PostgREST API: Authorization: Bearer {JWT}&lt;br/&gt;{name, category, priority}
+
+    PostgREST API-&gt;&gt;RLS Engine: Verify JWT
+    RLS Engine-&gt;&gt;RLS Engine: Extract auth.uid()
+
+    RLS Engine-&gt;&gt;get_user_realm_id(): Get user&#39;s realm_id
+    get_user_realm_id()-&gt;&gt;PostgreSQL: SELECT realm_id FROM profiles
+    PostgreSQL--&gt;&gt;get_user_realm_id(): realm_id
+    get_user_realm_id()--&gt;&gt;RLS Engine: realm_id
+
+    alt Realm Found
+        RLS Engine-&gt;&gt;Trigger: BEFORE INSERT trigger
+        Trigger-&gt;&gt;Trigger: Auto-populate:&lt;br/&gt;realm_id, user_id, created_by
+        Trigger-&gt;&gt;PostgreSQL: INSERT INTO tasks
+        PostgreSQL--&gt;&gt;Trigger: Row inserted
+
+        Trigger-&gt;&gt;PostgreSQL: Log to action_history
+        PostgreSQL--&gt;&gt;Trigger: Log created
+
+        PostgreSQL-&gt;&gt;Realtime Server: Notify change (WebSocket)
+        Realtime Server-&gt;&gt;Client: Broadcast INSERT event
+
+        PostgreSQL--&gt;&gt;PostgREST API: Return new task
+        PostgREST API--&gt;&gt;Client: 201 Created + task data
+    else No Realm Found
+        RLS Engine--&gt;&gt;Client: 403 Forbidden&lt;br/&gt;User not in any realm
+    end
+</code></pre>
+<hr>
+<h2>3. Data Retrieval Flow (with RLS)</h2>
+<h3>List Tasks with Realm Filtering</h3>
+<pre><code class="language-mermaid">sequenceDiagram
+    participant Client
+    participant PostgREST API
+    participant RLS Engine
+    participant get_user_realm_id()
+    participant PostgreSQL
+
+    Client-&gt;&gt;PostgREST API: GET /rest/v1/tasks
+    Note over Client,PostgREST API: Authorization: Bearer {JWT}
+
+    PostgREST API-&gt;&gt;RLS Engine: Verify JWT
+    RLS Engine-&gt;&gt;RLS Engine: Extract auth.uid()
+
+    RLS Engine-&gt;&gt;get_user_realm_id(): Get user&#39;s realm_id
+    get_user_realm_id()-&gt;&gt;PostgreSQL: SELECT realm_id FROM profiles&lt;br/&gt;WHERE id = auth.uid()
+    PostgreSQL--&gt;&gt;get_user_realm_id(): realm_id
+    get_user_realm_id()--&gt;&gt;RLS Engine: realm_id
+
+    RLS Engine-&gt;&gt;PostgreSQL: SELECT * FROM tasks&lt;br/&gt;WHERE realm_id = {user_realm_id}
+    Note over RLS Engine,PostgreSQL: RLS automatically filters by realm
+
+    PostgreSQL--&gt;&gt;RLS Engine: Filtered results
+    RLS Engine--&gt;&gt;PostgREST API: Tasks in user&#39;s realm only
+    PostgREST API--&gt;&gt;Client: 200 OK + tasks array
+</code></pre>
+<hr>
+<h2>4. Nested Query Flow</h2>
+<h3>Get Tasks with Full Hierarchy</h3>
+<pre><code class="language-mermaid">sequenceDiagram
+    participant Client
+    participant PostgREST API
+    participant RLS Engine
+    participant PostgreSQL
+
+    Client-&gt;&gt;PostgREST API: GET /rest/v1/tasks?select=*,subtasks(*)
+    Note over Client,PostgREST API: Complex nested query
+
+    PostgREST API-&gt;&gt;RLS Engine: Apply RLS on tasks
+    RLS Engine-&gt;&gt;PostgreSQL: SELECT * FROM tasks&lt;br/&gt;WHERE realm_id = get_user_realm_id()
+    PostgreSQL--&gt;&gt;RLS Engine: Tasks [T1, T2, T3]
+
+    loop For each task
+        RLS Engine-&gt;&gt;PostgreSQL: SELECT * FROM subtasks&lt;br/&gt;WHERE task_id = T1&lt;br/&gt;AND realm_id = get_user_realm_id()
+        PostgreSQL--&gt;&gt;RLS Engine: Subtasks for T1
+    end
+
+    RLS Engine-&gt;&gt;RLS Engine: Join and nest results
+    RLS Engine--&gt;&gt;PostgREST API: Hierarchical data structure
+    PostgREST API--&gt;&gt;Client: 200 OK + nested JSON
+</code></pre>
+<hr>
+<h2>5. Update Operation Flow</h2>
+<h3>Update Task with Validation</h3>
+<pre><code class="language-mermaid">sequenceDiagram
+    participant Client
+    participant PostgREST API
+    participant RLS Engine
+    participant PostgreSQL
+    participant Realtime Server
+
+    Client-&gt;&gt;PostgREST API: PATCH /rest/v1/tasks?id=eq.{task_id}
+    Note over Client,PostgREST API: {priority: 2, name: &quot;Updated&quot;}
+
+    PostgREST API-&gt;&gt;RLS Engine: Verify JWT &amp; Check policy
+    RLS Engine-&gt;&gt;PostgreSQL: Check if user can update task
+    Note over RLS Engine,PostgreSQL: WHERE realm_id = get_user_realm_id()&lt;br/&gt;AND id = {task_id}
+
+    alt Task Exists in User&#39;s Realm
+        PostgreSQL-&gt;&gt;PostgreSQL: UPDATE tasks SET...&lt;br/&gt;WHERE id = {task_id}
+        PostgreSQL--&gt;&gt;RLS Engine: 1 row updated
+
+        PostgreSQL-&gt;&gt;PostgreSQL: Log to action_history
+        PostgreSQL-&gt;&gt;Realtime Server: Notify UPDATE event
+        Realtime Server-&gt;&gt;Client: Broadcast change
+
+        RLS Engine--&gt;&gt;PostgREST API: Updated task
+        PostgREST API--&gt;&gt;Client: 200 OK + updated data
+    else Task Not Found or Wrong Realm
+        RLS Engine--&gt;&gt;PostgREST API: No rows affected
+        PostgREST API--&gt;&gt;Client: 404 Not Found
+    end
+</code></pre>
+<hr>
+<h2>6. Delete Operation with Cascade</h2>
+<h3>Delete Task (Cascade to Subtasks)</h3>
+<pre><code class="language-mermaid">sequenceDiagram
+    participant Client
+    participant PostgREST API
+    participant RLS Engine
+    participant PostgreSQL
+    participant Realtime Server
+
+    Client-&gt;&gt;PostgREST API: DELETE /rest/v1/tasks?id=eq.{task_id}
+
+    PostgREST API-&gt;&gt;RLS Engine: Verify JWT &amp; permissions
+    RLS Engine-&gt;&gt;PostgreSQL: Check task ownership
+
+    alt User Can Delete
+        PostgreSQL-&gt;&gt;PostgreSQL: DELETE FROM tasks&lt;br/&gt;WHERE id = {task_id}
+        Note over PostgreSQL: CASCADE triggers:
+        PostgreSQL-&gt;&gt;PostgreSQL: DELETE FROM subtasks&lt;br/&gt;WHERE task_id = {task_id}
+        PostgreSQL-&gt;&gt;PostgreSQL: DELETE FROM sub_subtasks&lt;br/&gt;WHERE subtask_id IN (...)
+
+        PostgreSQL-&gt;&gt;PostgreSQL: Log deletion to action_history
+
+        PostgreSQL-&gt;&gt;Realtime Server: Notify DELETE event
+        Realtime Server-&gt;&gt;Client: Broadcast deletion
+
+        PostgreSQL--&gt;&gt;RLS Engine: Rows deleted
+        RLS Engine--&gt;&gt;PostgREST API: Success
+        PostgREST API--&gt;&gt;Client: 204 No Content
+    else User Cannot Delete
+        RLS Engine--&gt;&gt;Client: 403 Forbidden
+    end
+</code></pre>
+<hr>
+<h2>7. Real-time Subscription Flow</h2>
+<h3>WebSocket Real-time Updates</h3>
+<pre><code class="language-mermaid">sequenceDiagram
+    participant Client A
+    participant Client B
+    participant Realtime Server
+    participant PostgreSQL
+    participant PostgREST API
+
+    Client A-&gt;&gt;Realtime Server: Connect WebSocket
+    Realtime Server--&gt;&gt;Client A: Connection established
+
+    Client A-&gt;&gt;Realtime Server: Subscribe to &#39;tasks&#39; table changes
+    Note over Client A,Realtime Server: channel.on(&#39;postgres_changes&#39;)
+    Realtime Server--&gt;&gt;Client A: Subscription confirmed
+
+    Client B-&gt;&gt;Realtime Server: Connect &amp; Subscribe
+    Realtime Server--&gt;&gt;Client B: Subscription confirmed
+
+    Client A-&gt;&gt;PostgREST API: POST /rest/v1/tasks (Create)
+    PostgREST API-&gt;&gt;PostgreSQL: INSERT INTO tasks
+    PostgreSQL--&gt;&gt;PostgREST API: Task created
+
+    PostgreSQL-&gt;&gt;Realtime Server: NOTIFY task_insert
+
+    par Broadcast to all subscribers
+        Realtime Server-&gt;&gt;Client A: Task INSERT event
+        Realtime Server-&gt;&gt;Client B: Task INSERT event
+    end
+
+    Note over Client A,Client B: Both clients see update instantly
+
+    Client A-&gt;&gt;Client A: Refetch tasks
+    Client B-&gt;&gt;Client B: Refetch tasks
+</code></pre>
+<hr>
+<h2>8. Milestone Creation Flow</h2>
+<h3>Create Milestone with Constraints</h3>
+<pre><code class="language-mermaid">sequenceDiagram
+    participant Client
+    participant PostgREST API
+    participant RLS Engine
+    participant PostgreSQL
+
+    Client-&gt;&gt;PostgREST API: POST /rest/v1/milestones
+    Note over Client,PostgREST API: {subtask_id: X,&lt;br/&gt;milestone_date: &quot;2024-02-01&quot;,&lt;br/&gt;milestone_text: &quot;Complete&quot;}
+
+    PostgREST API-&gt;&gt;RLS Engine: Verify JWT
+    RLS Engine-&gt;&gt;PostgreSQL: Check constraints
+
+    PostgreSQL-&gt;&gt;PostgreSQL: Validate CHECK constraint
+    Note over PostgreSQL: Either subtask_id OR sub_subtask_id&lt;br/&gt;(not both, not neither)
+
+    alt Constraint Valid
+        PostgreSQL-&gt;&gt;PostgreSQL: INSERT milestone
+        PostgreSQL-&gt;&gt;PostgreSQL: Auto-populate realm_id
+        PostgreSQL--&gt;&gt;RLS Engine: Milestone created
+        RLS Engine--&gt;&gt;PostgREST API: Success
+        PostgREST API--&gt;&gt;Client: 201 Created
+    else Constraint Violated
+        PostgreSQL--&gt;&gt;RLS Engine: Constraint error
+        RLS Engine--&gt;&gt;PostgREST API: Validation failed
+        PostgREST API--&gt;&gt;Client: 400 Bad Request&lt;br/&gt;&quot;violates check constraint&quot;
+    end
+</code></pre>
+<hr>
+<h2>9. Configuration Update Flow</h2>
+<h3>Upsert Configuration</h3>
+<pre><code class="language-mermaid">sequenceDiagram
+    participant Client
+    participant PostgREST API
+    participant PostgreSQL
+
+    Client-&gt;&gt;PostgREST API: POST /rest/v1/config
+    Note over Client,PostgREST API: Prefer: resolution=merge-duplicates&lt;br/&gt;{key: &quot;theme&quot;, value: {...}}
+
+    PostgREST API-&gt;&gt;PostgreSQL: Check for existing config
+    Note over PostgreSQL: SELECT * FROM config&lt;br/&gt;WHERE key = &quot;theme&quot;&lt;br/&gt;AND realm_id = get_user_realm_id()
+
+    alt Config Exists
+        PostgreSQL-&gt;&gt;PostgreSQL: UPDATE config&lt;br/&gt;SET value = {...}
+        PostgreSQL--&gt;&gt;PostgREST API: Config updated
+    else Config Doesn&#39;t Exist
+        PostgreSQL-&gt;&gt;PostgreSQL: INSERT INTO config&lt;br/&gt;(key, value)
+        PostgreSQL--&gt;&gt;PostgREST API: Config created
+    end
+
+    PostgREST API--&gt;&gt;Client: 200 OK + config data
+</code></pre>
+<hr>
+<h2>10. Action History Logging Flow</h2>
+<h3>Automatic Audit Trail</h3>
+<pre><code class="language-mermaid">sequenceDiagram
+    participant Client
+    participant PostgREST API
+    participant PostgreSQL Tasks
+    participant PostgreSQL History
+    participant Application Logger
+
+    Client-&gt;&gt;PostgREST API: POST /rest/v1/tasks
+    Note over Client,PostgREST API: Create new task
+
+    PostgREST API-&gt;&gt;PostgreSQL Tasks: INSERT INTO tasks
+    PostgreSQL Tasks--&gt;&gt;PostgREST API: Task created (ID: 123)
+
+    PostgREST API-&gt;&gt;Application Logger: Log action
+    Application Logger-&gt;&gt;PostgreSQL History: INSERT INTO action_history
+    Note over Application Logger,PostgreSQL History: {&lt;br/&gt;  action_type: &quot;create&quot;,&lt;br/&gt;  entity_type: &quot;task&quot;,&lt;br/&gt;  entity_id: &quot;123&quot;,&lt;br/&gt;  details: {...}&lt;br/&gt;}
+
+    PostgreSQL History--&gt;&gt;Application Logger: Log saved
+    Application Logger--&gt;&gt;PostgREST API: Logged successfully
+
+    PostgREST API--&gt;&gt;Client: 201 Created + task data
+
+    Note over PostgreSQL History: Audit trail preserved&lt;br/&gt;for compliance
+</code></pre>
+<hr>
+<h2>11. Multi-Tenant Isolation Enforcement</h2>
+<h3>Realm Boundary Protection</h3>
+<pre><code class="language-mermaid">flowchart TD
+    A[Client Request] --&gt; B{JWT Valid?}
+    B --&gt;|No| C[401 Unauthorized]
+    B --&gt;|Yes| D[Extract auth.uid]
+
+    D --&gt; E[Call get_user_realm_id]
+    E --&gt; F{User has realm?}
+
+    F --&gt;|No| G[403 User not in realm]
+    F --&gt;|Yes| H[Get realm_id]
+
+    H --&gt; I[Apply RLS Policy]
+    I --&gt; J[Filter by realm_id = user_realm_id]
+
+    J --&gt; K{Data in user&#39;s realm?}
+    K --&gt;|Yes| L[Return filtered data]
+    K --&gt;|No| M[Return empty set]
+
+    L --&gt; N[200 OK + Data]
+    M --&gt; N
+
+    style H fill:#90EE90
+    style I fill:#FFD700
+    style J fill:#FFD700
+</code></pre>
+<hr>
+<h2>12. Error Handling Flow</h2>
+<h3>Common Error Scenarios</h3>
+<pre><code class="language-mermaid">flowchart TD
+    A[Client Request] --&gt; B{Has API Key?}
+    B --&gt;|No| C[400 Missing apikey]
+    B --&gt;|Yes| D{Valid JWT?}
+
+    D --&gt;|No| E[401 Unauthorized]
+    D --&gt;|Expired| F[401 Token expired]
+    D --&gt;|Yes| G{User in realm?}
+
+    G --&gt;|No| H[403 No realm access]
+    G --&gt;|Yes| I{RLS Policy Pass?}
+
+    I --&gt;|No| J[403 RLS violation]
+    I --&gt;|Yes| K{Valid Input?}
+
+    K --&gt;|Invalid UUID| L[400 Invalid syntax]
+    K --&gt;|Missing Field| M[400 Missing required field]
+    K --&gt;|Constraint Error| N[409 Constraint violation]
+    K --&gt;|Valid| O[Process Request]
+
+    O --&gt; P{Success?}
+    P --&gt;|Yes| Q[200/201 Success]
+    P --&gt;|No| R[500 Server Error]
+
+    style C fill:#FF6B6B
+    style E fill:#FF6B6B
+    style F fill:#FF6B6B
+    style H fill:#FF6B6B
+    style J fill:#FF6B6B
+    style L fill:#FF8C42
+    style M fill:#FF8C42
+    style N fill:#FF8C42
+    style Q fill:#90EE90
+</code></pre>
+<hr>
+<h2>13. Full Task Hierarchy Query</h2>
+<h3>Complex Nested Data Retrieval</h3>
+<pre><code class="language-mermaid">flowchart LR
+    A[Client] --&gt;|1. Request| B[PostgREST API]
+    B --&gt;|2. Query| C[Tasks Table]
+    C --&gt;|3. Task IDs| D[Subtasks Table]
+    D --&gt;|4. Subtask IDs| E[Sub-Subtasks Table]
+    D --&gt;|5. Subtask IDs| F[Milestones Table]
+    E --&gt;|6. Sub-Subtask IDs| F
+
+    F --&gt;|7. Milestone Data| D
+    E --&gt;|8. Sub-Subtask + Milestones| D
+    D --&gt;|9. Subtask + Children| C
+    C --&gt;|10. Task + Full Tree| B
+    B --&gt;|11. Nested JSON| A
+
+    style A fill:#4A90E2
+    style B fill:#50E3C2
+    style C fill:#F5A623
+    style D fill:#F5A623
+    style E fill:#F5A623
+    style F fill:#F5A623
+</code></pre>
+<hr>
+<h2>14. Batch Operations Flow</h2>
+<h3>Multiple Subtasks Creation</h3>
+<pre><code class="language-mermaid">sequenceDiagram
+    participant Client
+    participant PostgREST API
+    participant PostgreSQL
+    participant Realtime
+
+    Client-&gt;&gt;PostgREST API: POST /rest/v1/subtasks (Array)
+    Note over Client,PostgREST API: [{task_id: X, name: &quot;A&quot;},&lt;br/&gt;{task_id: X, name: &quot;B&quot;},&lt;br/&gt;{task_id: X, name: &quot;C&quot;}]
+
+    loop For each subtask
+        PostgREST API-&gt;&gt;PostgreSQL: INSERT subtask
+        PostgreSQL-&gt;&gt;PostgreSQL: Apply RLS &amp; triggers
+        PostgreSQL--&gt;&gt;PostgREST API: Subtask created
+        PostgreSQL-&gt;&gt;Realtime: Notify INSERT
+    end
+
+    PostgREST API--&gt;&gt;Client: 201 Created + Array of subtasks
+
+    Note over Realtime: Multiple INSERT events&lt;br/&gt;broadcasted to subscribers
+</code></pre>
+<hr>
+<h2>15. Access Control Decision Flow</h2>
+<h3>RBAC Policy Evaluation</h3>
+<pre><code class="language-mermaid">flowchart TD
+    A[User Action Request] --&gt; B{Authenticated?}
+    B --&gt;|No| C[Deny - Login Required]
+    B --&gt;|Yes| D[Get User Role]
+
+    D --&gt; E{Action Type?}
+
+    E --&gt;|Read| F{Data in user&#39;s realm?}
+    F --&gt;|Yes| G[Allow]
+    F --&gt;|No| H[Deny]
+
+    E --&gt;|Create| I{User role?}
+    I --&gt;|Owner/Admin/User| J[Allow]
+    I --&gt;|Other| K[Deny]
+
+    E --&gt;|Update| L{Created by user OR Admin?}
+    L --&gt;|Yes| M[Allow]
+    L --&gt;|No| N[Deny]
+
+    E --&gt;|Delete| O{Is Owner/Admin?}
+    O --&gt;|Yes| P[Allow]
+    O --&gt;|No| Q{Created by user?}
+    Q --&gt;|Yes| P
+    Q --&gt;|No| R[Deny]
+
+    style G fill:#90EE90
+    style J fill:#90EE90
+    style M fill:#90EE90
+    style P fill:#90EE90
+    style C fill:#FF6B6B
+    style H fill:#FF6B6B
+    style K fill:#FF6B6B
+    style N fill:#FF6B6B
+    style R fill:#FF6B6B
+</code></pre>
+<hr>
+<h2>Summary</h2>
+<p>These flowcharts illustrate:</p>
+<ol>
+<li><strong>Authentication</strong>: JWT-based auth with token management</li>
+<li><strong>Authorization</strong>: Multi-tenant realm isolation via RLS</li>
+<li><strong>Data Operations</strong>: CRUD with automatic realm filtering</li>
+<li><strong>Real-time</strong>: WebSocket subscriptions for live updates</li>
+<li><strong>Error Handling</strong>: Comprehensive error scenarios</li>
+<li><strong>Complex Queries</strong>: Nested data retrieval patterns</li>
+<li><strong>Audit Logging</strong>: Automatic action history tracking</li>
+<li><strong>Access Control</strong>: Role-based permission evaluation</li>
+</ol>
+<p>All operations maintain strict realm isolation, ensuring complete data security in a multi-tenant environment.</p>
+
+<footer style="margin-top: 60px; padding-top: 20px; border-top: 1px solid #ddd; color: #888; text-align: center;">
+    <p>Generated on 1/21/2026 | <a href="index.html">Back to Index</a></p>
+</footer>
+</body>
+</html>

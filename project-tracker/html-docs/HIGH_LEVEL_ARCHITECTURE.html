@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HIGH LEVEL ARCHITECTURE</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            color: #333;
+        }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #34495e; border-bottom: 2px solid #95a5a6; padding-bottom: 8px; margin-top: 30px; }
+        h3 { color: #7f8c8d; }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        blockquote {
+            border-left: 4px solid #3498db;
+            padding-left: 20px;
+            margin-left: 0;
+            color: #555;
+        }
+        a { color: #3498db; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        @media print {
+            body { padding: 0; }
+            pre { page-break-inside: avoid; }
+            h1, h2, h3 { page-break-after: avoid; }
+        }
+    </style>
+</head>
+<body>
+<h1>Project Tracker - High Level Architecture</h1>
+<h2>System Architecture Overview</h2>
+<p>This document provides a high-level view of the Project Tracker system architecture, including component relationships, data flow, and deployment structure.</p>
+<hr>
+<h2>Architecture Diagram</h2>
+<pre><code>┌─────────────────────────────────────────────────────────────────────┐
+│                           CLIENT LAYER                               │
+│  ┌────────────────────────────────────────────────────────────┐    │
+│  │                     React Application                       │    │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐    │    │
+│  │  │  Dashboard   │  │   Calendar   │  │    Kanban    │    │    │
+│  │  │    Views     │  │     View     │  │     Board    │    │    │
+│  │  └──────────────┘  └──────────────┘  └──────────────┘    │    │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐    │    │
+│  │  │   Gantt      │  │    Task      │  │  Performance │    │    │
+│  │  │    Chart     │  │     List     │  │  Analytics   │    │    │
+│  │  └──────────────┘  └──────────────┘  └──────────────┘    │    │
+│  │                                                            │    │
+│  │  ┌─────────────────────────────────────────────────────┐  │    │
+│  │  │           Component Layer (TypeScript)              │  │    │
+│  │  │  • Task Management Components                       │  │    │
+│  │  │  • Modal Components (Add/Edit)                      │  │    │
+│  │  │  • Filter Components                                │  │    │
+│  │  │  • Auth Components                                  │  │    │
+│  │  └─────────────────────────────────────────────────────┘  │    │
+│  │                                                            │    │
+│  │  ┌─────────────────────────────────────────────────────┐  │    │
+│  │  │         State Management Layer                      │  │    │
+│  │  │  ┌──────────────┐  ┌──────────────┐                │  │    │
+│  │  │  │ AuthContext  │  │ ThemeContext │                │  │    │
+│  │  │  └──────────────┘  └──────────────┘                │  │    │
+│  │  │  ┌──────────────────────────────────┐              │  │    │
+│  │  │  │   Custom Hooks (useTrackerData)   │              │  │    │
+│  │  │  └──────────────────────────────────┘              │  │    │
+│  │  └─────────────────────────────────────────────────────┘  │    │
+│  │                                                            │    │
+│  │  ┌─────────────────────────────────────────────────────┐  │    │
+│  │  │            Supabase Client SDK                      │  │    │
+│  │  │  • Authentication                                   │  │    │
+│  │  │  • Real-time Subscriptions                          │  │    │
+│  │  │  • Database Queries                                 │  │    │
+│  │  └─────────────────────────────────────────────────────┘  │    │
+│  └────────────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────────────┘
+                              ↕ HTTPS / WebSocket
+┌─────────────────────────────────────────────────────────────────────┐
+│                        SUPABASE BACKEND                              │
+│  ┌────────────────────────────────────────────────────────────┐    │
+│  │                    API Gateway Layer                        │    │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐    │    │
+│  │  │     Auth     │  │   REST API   │  │  Realtime    │    │    │
+│  │  │     API      │  │   (PostgREST)│  │  (WebSocket) │    │    │
+│  │  └──────────────┘  └──────────────┘  └──────────────┘    │    │
+│  └────────────────────────────────────────────────────────────┘    │
+│                              ↕                                       │
+│  ┌────────────────────────────────────────────────────────────┐    │
+│  │              PostgreSQL Database Layer                      │    │
+│  │  ┌─────────────────────────────────────────────────────┐   │    │
+│  │  │          Row-Level Security (RLS) Engine             │   │    │
+│  │  │  • Realm-based isolation                             │   │    │
+│  │  │  • Role-based access policies                        │   │    │
+│  │  │  • Automatic security enforcement                    │   │    │
+│  │  └─────────────────────────────────────────────────────┘   │    │
+│  │                                                             │    │
+│  │  ┌─────────────────────────────────────────────────────┐   │    │
+│  │  │                 Database Tables                      │   │    │
+│  │  │  ┌──────────┐  ┌──────────┐  ┌──────────┐          │   │    │
+│  │  │  │  realms  │  │ profiles │  │  tasks   │          │   │    │
+│  │  │  └──────────┘  └──────────┘  └──────────┘          │   │    │
+│  │  │  ┌──────────┐  ┌──────────┐  ┌──────────┐          │   │    │
+│  │  │  │ subtasks │  │ sub_sub  │  │milestones│          │   │    │
+│  │  │  │          │  │  tasks   │  │          │          │   │    │
+│  │  │  └──────────┘  └──────────┘  └──────────┘          │   │    │
+│  │  │  ┌──────────┐  ┌──────────┐  ┌──────────┐          │   │    │
+│  │  │  │  config  │  │ action_  │  │temp_tasks│          │   │    │
+│  │  │  │          │  │ history  │  │          │          │   │    │
+│  │  │  └──────────┘  └──────────┘  └──────────┘          │   │    │
+│  │  └─────────────────────────────────────────────────────┘   │    │
+│  │                                                             │    │
+│  │  ┌─────────────────────────────────────────────────────┐   │    │
+│  │  │          Database Functions &amp; Triggers               │   │    │
+│  │  │  • get_user_realm_id()                               │   │    │
+│  │  │  • auto_populate_realm_and_user()                    │   │    │
+│  │  │  • Automatic realm assignment triggers               │   │    │
+│  │  └─────────────────────────────────────────────────────┘   │    │
+│  └────────────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<hr>
+<h2>Component Architecture</h2>
+<h3>Frontend Components</h3>
+<pre><code>src/
+├── components/
+│   ├── Dashboard.tsx                    # Main timeline view
+│   ├── CalendarDashboard.tsx            # Calendar view
+│   ├── KanbanDashboard.tsx             # Kanban board
+│   ├── GanttChartDashboard.tsx         # Gantt chart
+│   ├── TaskListDashboard.tsx           # Task list view
+│   ├── EngineerBreakdownDashboard.tsx  # Engineer analytics
+│   ├── EngineerPerformanceDashboard.tsx # Performance metrics
+│   ├── TaskDelayDashboard.tsx          # Delay tracking
+│   ├── ResourceAnalysisDashboard.tsx   # Resource analysis
+│   ├── HistoryDashboard.tsx            # Audit log
+│   ├── ConfigDashboard.tsx             # Configuration
+│   ├── AddTaskModal.tsx                # Task creation
+│   ├── AddSubtaskModal.tsx             # Subtask creation
+│   ├── AddSubSubtaskModal.tsx          # Sub-subtask creation
+│   ├── EditTaskModal.tsx               # Task editing
+│   ├── EditSubtaskModal.tsx            # Subtask editing
+│   ├── EditSubSubtaskModal.tsx         # Sub-subtask editing
+│   ├── MilestoneModal.tsx              # Milestone management
+│   ├── DeleteConfirmModal.tsx          # Deletion confirmation
+│   ├── PeopleFilter.tsx                # People filtering
+│   ├── TimeRangeSelector.tsx           # Date range selection
+│   ├── ThemeSelector.tsx               # Theme switcher
+│   └── AuthForm.tsx                    # Authentication
+│
+├── contexts/
+│   ├── AuthContext.tsx                 # Authentication state
+│   └── ThemeContext.tsx                # Theme state
+│
+├── hooks/
+│   ├── useTrackerData.ts               # Data fetching hook
+│   └── useConfig.ts                    # Config management
+│
+├── lib/
+│   ├── supabase.ts                     # Supabase client
+│   └── actionLogger.ts                 # Audit logging
+│
+└── types/
+    └── index.ts                        # TypeScript types
+</code></pre>
+<hr>
+<h2>Data Flow Architecture</h2>
+<h3>Read Operations</h3>
+<pre><code>User Action (View Dashboard)
+    ↓
+React Component Mount
+    ↓
+useTrackerData Hook
+    ↓
+Supabase Client Query
+    ↓
+PostgreSQL (RLS Check)
+    ↓
+Filter by realm_id = get_user_realm_id()
+    ↓
+Return filtered data
+    ↓
+Update React State
+    ↓
+Re-render UI
+</code></pre>
+<h3>Write Operations</h3>
+<pre><code>User Action (Create/Update Task)
+    ↓
+Component Handler
+    ↓
+Supabase Client Mutation
+    ↓
+PostgreSQL RLS Check
+    ↓
+Trigger: auto_populate_realm_and_user()
+    ↓
+Insert/Update Record
+    ↓
+Log to action_history table
+    ↓
+Real-time Broadcast (WebSocket)
+    ↓
+All Connected Clients
+    ↓
+useTrackerData Hook Refetch
+    ↓
+Update UI
+</code></pre>
+<hr>
+<h2>Security Architecture</h2>
+<h3>Multi-Tenant Isolation</h3>
+<pre><code>┌─────────────────────────────────────────────┐
+│            User Authentication               │
+│         (Supabase Auth - JWT)                │
+└─────────────────┬───────────────────────────┘
+                  ↓
+┌─────────────────────────────────────────────┐
+│         Extract User ID (auth.uid())         │
+└─────────────────┬───────────────────────────┘
+                  ↓
+┌─────────────────────────────────────────────┐
+│     Lookup User Profile → Get realm_id       │
+│        get_user_realm_id() function          │
+└─────────────────┬───────────────────────────┘
+                  ↓
+┌─────────────────────────────────────────────┐
+│        Row-Level Security Policies           │
+│   Filter ALL queries by realm_id             │
+│   WHERE realm_id = get_user_realm_id()       │
+└─────────────────┬───────────────────────────┘
+                  ↓
+┌─────────────────────────────────────────────┐
+│     Return only realm-specific data          │
+│     Complete data isolation achieved         │
+└─────────────────────────────────────────────┘
+</code></pre>
+<hr>
+<h2>Real-time Architecture</h2>
+<h3>WebSocket Connection Flow</h3>
+<pre><code>Client Initialization
+    ↓
+Establish WebSocket Connection
+    ↓
+Subscribe to Database Changes
+    ↓
+    channel.on(&#39;postgres_changes&#39;, {
+      event: &#39;*&#39;,
+      schema: &#39;public&#39;,
+      table: &#39;tasks&#39;
+    })
+    ↓
+Database Change Occurs
+    ↓
+PostgreSQL Notify
+    ↓
+Supabase Realtime Server
+    ↓
+Broadcast to Subscribed Clients
+    ↓
+Client Receives Update
+    ↓
+Trigger Data Refetch
+    ↓
+UI Auto-updates
+</code></pre>
+<hr>
+<h2>Deployment Architecture</h2>
+<pre><code>┌─────────────────────────────────────────────┐
+│              Production Environment          │
+│                                              │
+│  ┌────────────────────────────────────┐     │
+│  │      CDN (Static Assets)           │     │
+│  │  • HTML, CSS, JS bundles           │     │
+│  │  • Images, fonts                   │     │
+│  │  • Cached globally                 │     │
+│  └────────────┬───────────────────────┘     │
+│               ↓                              │
+│  ┌────────────────────────────────────┐     │
+│  │    Web Server (Nginx/Vite)         │     │
+│  │  • Serve React SPA                 │     │
+│  │  • Route handling                  │     │
+│  │  • SSL/TLS termination             │     │
+│  └────────────┬───────────────────────┘     │
+│               ↓                              │
+│  ┌────────────────────────────────────┐     │
+│  │      Supabase Cloud Platform       │     │
+│  │  ┌──────────────────────────────┐  │     │
+│  │  │   Auth Service               │  │     │
+│  │  └──────────────────────────────┘  │     │
+│  │  ┌──────────────────────────────┐  │     │
+│  │  │   PostgreSQL Database        │  │     │
+│  │  │   (Managed, Auto-scaling)    │  │     │
+│  │  └──────────────────────────────┘  │     │
+│  │  ┌──────────────────────────────┐  │     │
+│  │  │   Realtime Server            │  │     │
+│  │  └──────────────────────────────┘  │     │
+│  │  ┌──────────────────────────────┐  │     │
+│  │  │   Storage Service            │  │     │
+│  │  └──────────────────────────────┘  │     │
+│  └────────────────────────────────────┘     │
+└─────────────────────────────────────────────┘
+</code></pre>
+<hr>
+<h2>Technology Stack</h2>
+<h3>Frontend Stack</h3>
+<ul>
+<li><strong>Framework</strong>: React 18+</li>
+<li><strong>Language</strong>: TypeScript</li>
+<li><strong>Routing</strong>: React Router v6</li>
+<li><strong>Styling</strong>: TailwindCSS</li>
+<li><strong>Build Tool</strong>: Vite</li>
+<li><strong>Icons</strong>: Lucide React</li>
+</ul>
+<h3>Backend Stack</h3>
+<ul>
+<li><strong>Database</strong>: PostgreSQL 15+</li>
+<li><strong>BaaS</strong>: Supabase</li>
+<li><strong>Authentication</strong>: Supabase Auth (JWT)</li>
+<li><strong>Real-time</strong>: Supabase Realtime (WebSocket)</li>
+<li><strong>API</strong>: PostgREST (Auto-generated REST API)</li>
+</ul>
+<h3>Development Tools</h3>
+<ul>
+<li><strong>Version Control</strong>: Git</li>
+<li><strong>Package Manager</strong>: npm</li>
+<li><strong>Code Quality</strong>: ESLint, Prettier</li>
+<li><strong>Type Checking</strong>: TypeScript Compiler</li>
+</ul>
+<hr>
+<h2>Scalability Considerations</h2>
+<h3>Horizontal Scaling</h3>
+<ul>
+<li><strong>Stateless Frontend</strong>: Can be deployed across multiple servers</li>
+<li><strong>CDN Distribution</strong>: Static assets served from edge locations</li>
+<li><strong>Database Scaling</strong>: Supabase auto-scaling for read replicas</li>
+</ul>
+<h3>Performance Optimizations</h3>
+<ul>
+<li><strong>Code Splitting</strong>: Dynamic imports for route-based splitting</li>
+<li><strong>Lazy Loading</strong>: Components loaded on demand</li>
+<li><strong>Memoization</strong>: React.memo for expensive components</li>
+<li><strong>Database Indexes</strong>: Optimized queries with proper indexing</li>
+<li><strong>Connection Pooling</strong>: Efficient database connection management</li>
+</ul>
+<h3>Caching Strategy</h3>
+<ul>
+<li><strong>Browser Cache</strong>: Static assets cached with versioning</li>
+<li><strong>React State</strong>: Local state caching with Context API</li>
+<li><strong>Query Results</strong>: Temporary caching in hooks</li>
+<li><strong>Real-time Updates</strong>: Optimistic UI updates</li>
+</ul>
+<hr>
+<h2>Monitoring &amp; Observability</h2>
+<h3>Logging</h3>
+<ul>
+<li><strong>Action History</strong>: All user actions logged to database</li>
+<li><strong>Error Tracking</strong>: Console error logging</li>
+<li><strong>Audit Trail</strong>: Complete change history</li>
+</ul>
+<h3>Metrics</h3>
+<ul>
+<li><strong>Database Metrics</strong>: Supabase dashboard</li>
+<li><strong>Application Metrics</strong>: Performance monitoring</li>
+<li><strong>User Analytics</strong>: Usage tracking</li>
+</ul>
+<hr>
+<h2>Disaster Recovery</h2>
+<h3>Backup Strategy</h3>
+<ul>
+<li><strong>Automatic Backups</strong>: Daily Supabase backups</li>
+<li><strong>Point-in-Time Recovery</strong>: PostgreSQL PITR</li>
+<li><strong>Backup Retention</strong>: 30-day retention policy</li>
+</ul>
+<h3>High Availability</h3>
+<ul>
+<li><strong>Database Replication</strong>: Multi-region replication (Supabase Pro)</li>
+<li><strong>Automatic Failover</strong>: Built-in failover mechanisms</li>
+<li><strong>99.9% Uptime SLA</strong>: Supabase cloud guarantee</li>
+</ul>
+
+<footer style="margin-top: 60px; padding-top: 20px; border-top: 1px solid #ddd; color: #888; text-align: center;">
+    <p>Generated on 1/21/2026 | <a href="index.html">Back to Index</a></p>
+</footer>
+</body>
+</html>

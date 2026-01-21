@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API DOCUMENTATION</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            color: #333;
+        }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #34495e; border-bottom: 2px solid #95a5a6; padding-bottom: 8px; margin-top: 30px; }
+        h3 { color: #7f8c8d; }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        blockquote {
+            border-left: 4px solid #3498db;
+            padding-left: 20px;
+            margin-left: 0;
+            color: #555;
+        }
+        a { color: #3498db; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        @media print {
+            body { padding: 0; }
+            pre { page-break-inside: avoid; }
+            h1, h2, h3 { page-break-after: avoid; }
+        }
+    </style>
+</head>
+<body>
+<h1>Project Tracker - API Documentation</h1>
+<h2>Overview</h2>
+<p>The Project Tracker uses Supabase&#39;s auto-generated REST API (PostgREST) for all database operations. All API requests require authentication and are automatically filtered by realm isolation through Row-Level Security (RLS).</p>
+<p><strong>Base URL</strong>: <code>https://[YOUR_PROJECT].supabase.co/rest/v1</code></p>
+<p><strong>Authentication</strong>: All requests require a JWT token in the Authorization header.</p>
+<hr>
+<h2>Authentication</h2>
+<h3>Sign Up</h3>
+<p>Create a new user account.</p>
+<pre><code class="language-bash">curl -X POST &#39;https://[YOUR_PROJECT].supabase.co/auth/v1/signup&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d &#39;{
+    &quot;email&quot;: &quot;user@example.com&quot;,
+    &quot;password&quot;: &quot;securePassword123&quot;
+  }&#39;
+</code></pre>
+<p><strong>Response:</strong></p>
+<pre><code class="language-json">{
+  &quot;access_token&quot;: &quot;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...&quot;,
+  &quot;token_type&quot;: &quot;bearer&quot;,
+  &quot;expires_in&quot;: 3600,
+  &quot;refresh_token&quot;: &quot;...&quot;,
+  &quot;user&quot;: {
+    &quot;id&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
+    &quot;email&quot;: &quot;user@example.com&quot;,
+    &quot;created_at&quot;: &quot;2024-01-20T10:00:00Z&quot;
+  }
+}
+</code></pre>
+<hr>
+<h3>Sign In</h3>
+<p>Authenticate an existing user.</p>
+<pre><code class="language-bash">curl -X POST &#39;https://[YOUR_PROJECT].supabase.co/auth/v1/token?grant_type=password&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d &#39;{
+    &quot;email&quot;: &quot;user@example.com&quot;,
+    &quot;password&quot;: &quot;securePassword123&quot;
+  }&#39;
+</code></pre>
+<p><strong>Response:</strong> Same as Sign Up</p>
+<hr>
+<h3>Get Current User</h3>
+<p>Retrieve the currently authenticated user.</p>
+<pre><code class="language-bash">curl -X GET &#39;https://[YOUR_PROJECT].supabase.co/auth/v1/user&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot;
+</code></pre>
+<p><strong>Response:</strong></p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
+  &quot;email&quot;: &quot;user@example.com&quot;,
+  &quot;created_at&quot;: &quot;2024-01-20T10:00:00Z&quot;
+}
+</code></pre>
+<hr>
+<h3>Sign Out</h3>
+<p>End the current session.</p>
+<pre><code class="language-bash">curl -X POST &#39;https://[YOUR_PROJECT].supabase.co/auth/v1/logout&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot;
+</code></pre>
+<hr>
+<h2>Realms API</h2>
+<h3>Get Current User&#39;s Realm</h3>
+<pre><code class="language-bash">curl -X GET &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/profiles?select=realm_id,realms(name)&amp;id=eq.[USER_ID]&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot;
+</code></pre>
+<p><strong>Response:</strong></p>
+<pre><code class="language-json">[
+  {
+    &quot;realm_id&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
+    &quot;realms&quot;: {
+      &quot;name&quot;: &quot;Acme Corporation&quot;
+    }
+  }
+]
+</code></pre>
+<hr>
+<h3>List All Realms (Admin Only)</h3>
+<pre><code class="language-bash">curl -X GET &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/realms&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot;
+</code></pre>
+<p><strong>Response:</strong></p>
+<pre><code class="language-json">[
+  {
+    &quot;id&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
+    &quot;name&quot;: &quot;Acme Corporation&quot;,
+    &quot;created_at&quot;: &quot;2024-01-15T08:00:00Z&quot;,
+    &quot;updated_at&quot;: &quot;2024-01-15T08:00:00Z&quot;
+  }
+]
+</code></pre>
+<hr>
+<h3>Create a New Realm</h3>
+<pre><code class="language-bash">curl -X POST &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/realms&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -H &quot;Prefer: return=representation&quot; \
+  -d &#39;{
+    &quot;name&quot;: &quot;New Organization&quot;
+  }&#39;
+</code></pre>
+<p><strong>Response:</strong></p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
+  &quot;name&quot;: &quot;New Organization&quot;,
+  &quot;created_at&quot;: &quot;2024-01-20T10:00:00Z&quot;,
+  &quot;updated_at&quot;: &quot;2024-01-20T10:00:00Z&quot;
+}
+</code></pre>
+<hr>
+<h2>Profiles API</h2>
+<h3>Get All Profiles in Realm</h3>
+<pre><code class="language-bash">curl -X GET &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/profiles&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot;
+</code></pre>
+<p><strong>Response:</strong></p>
+<pre><code class="language-json">[
+  {
+    &quot;id&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
+    &quot;email&quot;: &quot;john@example.com&quot;,
+    &quot;full_name&quot;: &quot;John Doe&quot;,
+    &quot;role&quot;: &quot;admin&quot;,
+    &quot;realm_id&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
+    &quot;created_at&quot;: &quot;2024-01-10T12:00:00Z&quot;,
+    &quot;updated_at&quot;: &quot;2024-01-20T09:00:00Z&quot;
+  },
+  {
+    &quot;id&quot;: &quot;660f9511-f3ac-52e5-b827-557766551111&quot;,
+    &quot;email&quot;: &quot;jane@example.com&quot;,
+    &quot;full_name&quot;: &quot;Jane Smith&quot;,
+    &quot;role&quot;: &quot;user&quot;,
+    &quot;realm_id&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
+    &quot;created_at&quot;: &quot;2024-01-12T14:00:00Z&quot;,
+    &quot;updated_at&quot;: &quot;2024-01-15T16:00:00Z&quot;
+  }
+]
+</code></pre>
+<hr>
+<h3>Update User Profile</h3>
+<pre><code class="language-bash">curl -X PATCH &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/profiles?id=eq.550e8400-e29b-41d4-a716-446655440000&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -H &quot;Prefer: return=representation&quot; \
+  -d &#39;{
+    &quot;full_name&quot;: &quot;John Updated Doe&quot;
+  }&#39;
+</code></pre>
+<hr>
+<h2>Tasks API</h2>
+<h3>Create a Task</h3>
+<pre><code class="language-bash">curl -X POST &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/tasks&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -H &quot;Prefer: return=representation&quot; \
+  -d &#39;{
+    &quot;name&quot;: &quot;Build User Authentication&quot;,
+    &quot;category&quot;: &quot;dev&quot;,
+    &quot;priority&quot;: 1
+  }&#39;
+</code></pre>
+<p><strong>Note</strong>: <code>realm_id</code>, <code>user_id</code>, and <code>created_by</code> are auto-populated by database trigger.</p>
+<p><strong>Response:</strong></p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;789e1234-e89b-12d3-a456-426614174999&quot;,
+  &quot;realm_id&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
+  &quot;user_id&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
+  &quot;created_by&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
+  &quot;name&quot;: &quot;Build User Authentication&quot;,
+  &quot;category&quot;: &quot;dev&quot;,
+  &quot;priority&quot;: 1,
+  &quot;created_at&quot;: &quot;2024-01-20T10:00:00Z&quot;,
+  &quot;updated_at&quot;: &quot;2024-01-20T10:00:00Z&quot;
+}
+</code></pre>
+<hr>
+<h3>List All Tasks</h3>
+<pre><code class="language-bash">curl -X GET &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/tasks?order=category.asc&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot;
+</code></pre>
+<p><strong>Response:</strong></p>
+<pre><code class="language-json">[
+  {
+    &quot;id&quot;: &quot;789e1234-e89b-12d3-a456-426614174999&quot;,
+    &quot;realm_id&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
+    &quot;user_id&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
+    &quot;created_by&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
+    &quot;name&quot;: &quot;Build User Authentication&quot;,
+    &quot;category&quot;: &quot;dev&quot;,
+    &quot;priority&quot;: 1,
+    &quot;created_at&quot;: &quot;2024-01-20T10:00:00Z&quot;,
+    &quot;updated_at&quot;: &quot;2024-01-20T10:00:00Z&quot;
+  }
+]
+</code></pre>
+<hr>
+<h3>Get a Single Task</h3>
+<pre><code class="language-bash">curl -X GET &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/tasks?id=eq.789e1234-e89b-12d3-a456-426614174999&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot;
+</code></pre>
+<hr>
+<h3>Update a Task</h3>
+<pre><code class="language-bash">curl -X PATCH &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/tasks?id=eq.789e1234-e89b-12d3-a456-426614174999&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -H &quot;Prefer: return=representation&quot; \
+  -d &#39;{
+    &quot;priority&quot;: 2,
+    &quot;name&quot;: &quot;Build User Authentication (Updated)&quot;
+  }&#39;
+</code></pre>
+<hr>
+<h3>Delete a Task</h3>
+<pre><code class="language-bash">curl -X DELETE &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/tasks?id=eq.789e1234-e89b-12d3-a456-426614174999&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot;
+</code></pre>
+<hr>
+<h3>Filter Tasks by Category</h3>
+<pre><code class="language-bash">curl -X GET &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/tasks?category=eq.dev&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot;
+</code></pre>
+<hr>
+<h3>Filter Tasks by Priority</h3>
+<pre><code class="language-bash">curl -X GET &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/tasks?priority=eq.1&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot;
+</code></pre>
+<hr>
+<h2>Subtasks API</h2>
+<h3>Create a Subtask</h3>
+<pre><code class="language-bash">curl -X POST &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/subtasks&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -H &quot;Prefer: return=representation&quot; \
+  -d &#39;{
+    &quot;task_id&quot;: &quot;789e1234-e89b-12d3-a456-426614174999&quot;,
+    &quot;name&quot;: &quot;Design Login Form&quot;,
+    &quot;assigned_to&quot;: &quot;660f9511-f3ac-52e5-b827-557766551111&quot;
+  }&#39;
+</code></pre>
+<p><strong>Response:</strong></p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;888e5678-e89b-12d3-a456-426614174888&quot;,
+  &quot;realm_id&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
+  &quot;task_id&quot;: &quot;789e1234-e89b-12d3-a456-426614174999&quot;,
+  &quot;user_id&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
+  &quot;created_by&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
+  &quot;name&quot;: &quot;Design Login Form&quot;,
+  &quot;assigned_to&quot;: &quot;660f9511-f3ac-52e5-b827-557766551111&quot;,
+  &quot;created_at&quot;: &quot;2024-01-20T10:05:00Z&quot;,
+  &quot;updated_at&quot;: &quot;2024-01-20T10:05:00Z&quot;
+}
+</code></pre>
+<hr>
+<h3>List Subtasks for a Task</h3>
+<pre><code class="language-bash">curl -X GET &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/subtasks?task_id=eq.789e1234-e89b-12d3-a456-426614174999&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot;
+</code></pre>
+<hr>
+<h3>Update Subtask Assignment</h3>
+<pre><code class="language-bash">curl -X PATCH &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/subtasks?id=eq.888e5678-e89b-12d3-a456-426614174888&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -H &quot;Prefer: return=representation&quot; \
+  -d &#39;{
+    &quot;assigned_to&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;
+  }&#39;
+</code></pre>
+<hr>
+<h3>Delete a Subtask</h3>
+<pre><code class="language-bash">curl -X DELETE &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/subtasks?id=eq.888e5678-e89b-12d3-a456-426614174888&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot;
+</code></pre>
+<hr>
+<h2>Sub-Subtasks API</h2>
+<h3>Create a Sub-Subtask</h3>
+<pre><code class="language-bash">curl -X POST &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/sub_subtasks&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -H &quot;Prefer: return=representation&quot; \
+  -d &#39;{
+    &quot;subtask_id&quot;: &quot;888e5678-e89b-12d3-a456-426614174888&quot;,
+    &quot;name&quot;: &quot;Create email input field&quot;,
+    &quot;order_index&quot;: 1,
+    &quot;assigned_to&quot;: &quot;660f9511-f3ac-52e5-b827-557766551111&quot;
+  }&#39;
+</code></pre>
+<p><strong>Response:</strong></p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;999e6789-e89b-12d3-a456-426614174777&quot;,
+  &quot;realm_id&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
+  &quot;subtask_id&quot;: &quot;888e5678-e89b-12d3-a456-426614174888&quot;,
+  &quot;user_id&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
+  &quot;created_by&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
+  &quot;name&quot;: &quot;Create email input field&quot;,
+  &quot;order_index&quot;: 1,
+  &quot;assigned_to&quot;: &quot;660f9511-f3ac-52e5-b827-557766551111&quot;,
+  &quot;created_at&quot;: &quot;2024-01-20T10:10:00Z&quot;
+}
+</code></pre>
+<hr>
+<h3>List Sub-Subtasks for a Subtask</h3>
+<pre><code class="language-bash">curl -X GET &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/sub_subtasks?subtask_id=eq.888e5678-e89b-12d3-a456-426614174888&amp;order=order_index.asc&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot;
+</code></pre>
+<hr>
+<h3>Update Sub-Subtask Order</h3>
+<pre><code class="language-bash">curl -X PATCH &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/sub_subtasks?id=eq.999e6789-e89b-12d3-a456-426614174777&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -H &quot;Prefer: return=representation&quot; \
+  -d &#39;{
+    &quot;order_index&quot;: 2
+  }&#39;
+</code></pre>
+<hr>
+<h2>Milestones API</h2>
+<h3>Create a Milestone (for Subtask)</h3>
+<pre><code class="language-bash">curl -X POST &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/milestones&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -H &quot;Prefer: return=representation&quot; \
+  -d &#39;{
+    &quot;subtask_id&quot;: &quot;888e5678-e89b-12d3-a456-426614174888&quot;,
+    &quot;milestone_date&quot;: &quot;2024-02-01&quot;,
+    &quot;milestone_text&quot;: &quot;Design Complete&quot;
+  }&#39;
+</code></pre>
+<p><strong>Response:</strong></p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;aaa1234-e89b-12d3-a456-426614174666&quot;,
+  &quot;realm_id&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
+  &quot;user_id&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
+  &quot;created_by&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
+  &quot;subtask_id&quot;: &quot;888e5678-e89b-12d3-a456-426614174888&quot;,
+  &quot;sub_subtask_id&quot;: null,
+  &quot;milestone_date&quot;: &quot;2024-02-01&quot;,
+  &quot;milestone_text&quot;: &quot;Design Complete&quot;,
+  &quot;created_at&quot;: &quot;2024-01-20T10:15:00Z&quot;,
+  &quot;updated_at&quot;: &quot;2024-01-20T10:15:00Z&quot;
+}
+</code></pre>
+<hr>
+<h3>Create a Milestone (for Sub-Subtask)</h3>
+<pre><code class="language-bash">curl -X POST &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/milestones&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -H &quot;Prefer: return=representation&quot; \
+  -d &#39;{
+    &quot;sub_subtask_id&quot;: &quot;999e6789-e89b-12d3-a456-426614174777&quot;,
+    &quot;milestone_date&quot;: &quot;2024-01-25&quot;,
+    &quot;milestone_text&quot;: &quot;Email field ready&quot;
+  }&#39;
+</code></pre>
+<hr>
+<h3>List All Milestones in Date Range</h3>
+<pre><code class="language-bash">curl -X GET &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/milestones?milestone_date=gte.2024-01-01&amp;milestone_date=lte.2024-12-31&amp;order=milestone_date.asc&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot;
+</code></pre>
+<hr>
+<h3>Update a Milestone</h3>
+<pre><code class="language-bash">curl -X PATCH &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/milestones?id=eq.aaa1234-e89b-12d3-a456-426614174666&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -H &quot;Prefer: return=representation&quot; \
+  -d &#39;{
+    &quot;milestone_date&quot;: &quot;2024-02-05&quot;,
+    &quot;milestone_text&quot;: &quot;Design Complete (Revised)&quot;
+  }&#39;
+</code></pre>
+<hr>
+<h3>Delete a Milestone</h3>
+<pre><code class="language-bash">curl -X DELETE &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/milestones?id=eq.aaa1234-e89b-12d3-a456-426614174666&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot;
+</code></pre>
+<hr>
+<h2>Config API</h2>
+<h3>Get Configuration</h3>
+<pre><code class="language-bash">curl -X GET &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/config?key=eq.theme&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot;
+</code></pre>
+<p><strong>Response:</strong></p>
+<pre><code class="language-json">[
+  {
+    &quot;id&quot;: &quot;bbb2345-e89b-12d3-a456-426614174555&quot;,
+    &quot;realm_id&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
+    &quot;user_id&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
+    &quot;key&quot;: &quot;theme&quot;,
+    &quot;value&quot;: {
+      &quot;selected&quot;: &quot;dark&quot;,
+      &quot;customColors&quot;: {}
+    },
+    &quot;created_at&quot;: &quot;2024-01-15T08:00:00Z&quot;,
+    &quot;updated_at&quot;: &quot;2024-01-20T09:00:00Z&quot;
+  }
+]
+</code></pre>
+<hr>
+<h3>Set Configuration</h3>
+<pre><code class="language-bash">curl -X POST &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/config&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -H &quot;Prefer: return=representation,resolution=merge-duplicates&quot; \
+  -d &#39;{
+    &quot;key&quot;: &quot;theme&quot;,
+    &quot;value&quot;: {
+      &quot;selected&quot;: &quot;blue&quot;,
+      &quot;customColors&quot;: {}
+    }
+  }&#39;
+</code></pre>
+<p><strong>Note</strong>: Use <code>resolution=merge-duplicates</code> to upsert (update if exists, insert if not).</p>
+<hr>
+<h2>Action History API</h2>
+<h3>List Recent Actions</h3>
+<pre><code class="language-bash">curl -X GET &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/action_history?order=created_at.desc&amp;limit=50&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot;
+</code></pre>
+<p><strong>Response:</strong></p>
+<pre><code class="language-json">[
+  {
+    &quot;id&quot;: &quot;ccc3456-e89b-12d3-a456-426614174444&quot;,
+    &quot;realm_id&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
+    &quot;user_id&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
+    &quot;action_type&quot;: &quot;create&quot;,
+    &quot;entity_type&quot;: &quot;task&quot;,
+    &quot;entity_id&quot;: &quot;789e1234-e89b-12d3-a456-426614174999&quot;,
+    &quot;details&quot;: {
+      &quot;name&quot;: &quot;Build User Authentication&quot;,
+      &quot;category&quot;: &quot;dev&quot;,
+      &quot;priority&quot;: 1
+    },
+    &quot;created_at&quot;: &quot;2024-01-20T10:00:00Z&quot;
+  }
+]
+</code></pre>
+<hr>
+<h3>Filter Actions by User</h3>
+<pre><code class="language-bash">curl -X GET &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/action_history?user_id=eq.550e8400-e29b-41d4-a716-446655440000&amp;order=created_at.desc&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot;
+</code></pre>
+<hr>
+<h3>Filter Actions by Entity</h3>
+<pre><code class="language-bash">curl -X GET &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/action_history?entity_type=eq.task&amp;entity_id=eq.789e1234-e89b-12d3-a456-426614174999&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot;
+</code></pre>
+<hr>
+<h2>Temporary Tasks API</h2>
+<h3>Create Temp Task</h3>
+<pre><code class="language-bash">curl -X POST &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/temp_tasks&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -H &quot;Prefer: return=representation&quot; \
+  -d &#39;{
+    &quot;name&quot;: &quot;Quick Fix for Bug #123&quot;,
+    &quot;priority&quot;: &quot;High&quot;,
+    &quot;status&quot;: &quot;draft&quot;,
+    &quot;created_byname&quot;: &quot;John Doe&quot;
+  }&#39;
+</code></pre>
+<p><strong>Response:</strong></p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;ddd4567-e89b-12d3-a456-426614174333&quot;,
+  &quot;realm_id&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
+  &quot;user_id&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
+  &quot;created_by&quot;: &quot;550e8400-e29b-41d4-a716-446655440000&quot;,
+  &quot;name&quot;: &quot;Quick Fix for Bug #123&quot;,
+  &quot;priority&quot;: &quot;High&quot;,
+  &quot;status&quot;: &quot;draft&quot;,
+  &quot;assigned_byname&quot;: null,
+  &quot;created_byname&quot;: &quot;John Doe&quot;,
+  &quot;created_at&quot;: &quot;2024-01-20T10:20:00Z&quot;,
+  &quot;updated_at&quot;: &quot;2024-01-20T10:20:00Z&quot;
+}
+</code></pre>
+<hr>
+<h3>List Temp Tasks</h3>
+<pre><code class="language-bash">curl -X GET &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/temp_tasks?order=created_at.desc&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot;
+</code></pre>
+<hr>
+<h3>Update Temp Task Status</h3>
+<pre><code class="language-bash">curl -X PATCH &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/temp_tasks?id=eq.ddd4567-e89b-12d3-a456-426614174333&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -H &quot;Prefer: return=representation&quot; \
+  -d &#39;{
+    &quot;status&quot;: &quot;approved&quot;
+  }&#39;
+</code></pre>
+<hr>
+<h2>Advanced Queries</h2>
+<h3>Get Tasks with Subtasks (Nested)</h3>
+<pre><code class="language-bash">curl -X GET &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/tasks?select=*,subtasks(*)&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot;
+</code></pre>
+<hr>
+<h3>Get Tasks with Full Hierarchy</h3>
+<pre><code class="language-bash">curl -X GET &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/tasks?select=*,subtasks(*,sub_subtasks(*,milestones(*)),milestones(*))&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot;
+</code></pre>
+<hr>
+<h3>Get Subtasks with Assigned User</h3>
+<pre><code class="language-bash">curl -X GET &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/subtasks?select=*,profiles!assigned_to(email,full_name)&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot;
+</code></pre>
+<hr>
+<h2>Error Responses</h2>
+<h3>401 Unauthorized</h3>
+<pre><code class="language-json">{
+  &quot;message&quot;: &quot;Invalid JWT token&quot;
+}
+</code></pre>
+<h3>403 Forbidden</h3>
+<pre><code class="language-json">{
+  &quot;message&quot;: &quot;new row violates row-level security policy&quot;
+}
+</code></pre>
+<h3>400 Bad Request</h3>
+<pre><code class="language-json">{
+  &quot;message&quot;: &quot;invalid input syntax for type uuid: \&quot;invalid-id\&quot;&quot;
+}
+</code></pre>
+<h3>409 Conflict</h3>
+<pre><code class="language-json">{
+  &quot;message&quot;: &quot;duplicate key value violates unique constraint&quot;
+}
+</code></pre>
+<hr>
+<h2>Request Headers</h2>
+<h3>Required Headers</h3>
+<table>
+<thead>
+<tr>
+<th>Header</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>apikey</code></td>
+<td>Supabase anonymous key</td>
+<td><code>eyJhbGc...</code></td>
+</tr>
+<tr>
+<td><code>Authorization</code></td>
+<td>Bearer token from auth</td>
+<td><code>Bearer eyJhbG...</code></td>
+</tr>
+<tr>
+<td><code>Content-Type</code></td>
+<td>Request content type</td>
+<td><code>application/json</code></td>
+</tr>
+</tbody></table>
+<h3>Optional Headers</h3>
+<table>
+<thead>
+<tr>
+<th>Header</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>Prefer</code></td>
+<td>PostgREST preferences</td>
+<td><code>return=representation</code></td>
+</tr>
+</tbody></table>
+<h3>Prefer Header Options</h3>
+<ul>
+<li><code>return=representation</code>: Return the created/updated record</li>
+<li><code>return=minimal</code>: Return no content (faster)</li>
+<li><code>resolution=merge-duplicates</code>: Upsert behavior</li>
+<li><code>count=exact</code>: Return total count of records</li>
+</ul>
+<hr>
+<h2>Rate Limiting</h2>
+<p>Supabase applies rate limiting based on your plan:</p>
+<ul>
+<li><strong>Free Tier</strong>: 500 requests per minute</li>
+<li><strong>Pro Tier</strong>: 1000 requests per minute</li>
+<li><strong>Enterprise</strong>: Custom limits</li>
+</ul>
+<hr>
+<h2>Pagination</h2>
+<p>Use <code>limit</code> and <code>offset</code> for pagination:</p>
+<pre><code class="language-bash">curl -X GET &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/tasks?limit=10&amp;offset=0&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot;
+</code></pre>
+<p>Get total count:</p>
+<pre><code class="language-bash">curl -X GET &#39;https://[YOUR_PROJECT].supabase.co/rest/v1/tasks?limit=10&amp;offset=0&#39; \
+  -H &quot;apikey: [YOUR_ANON_KEY]&quot; \
+  -H &quot;Authorization: Bearer [ACCESS_TOKEN]&quot; \
+  -H &quot;Prefer: count=exact&quot;
+</code></pre>
+<p>Response includes <code>Content-Range</code> header:</p>
+<pre><code>Content-Range: 0-9/156
+</code></pre>
+<hr>
+<h2>WebSocket Real-time Subscriptions</h2>
+<p>Subscribe to database changes using Supabase Realtime:</p>
+<pre><code class="language-javascript">const channel = supabase.channel(&#39;tracker_changes&#39;);
+
+channel
+  .on(&#39;postgres_changes&#39;, {
+    event: &#39;*&#39;,
+    schema: &#39;public&#39;,
+    table: &#39;tasks&#39;
+  }, (payload) =&gt; {
+    console.log(&#39;Task changed:&#39;, payload);
+  })
+  .subscribe();
+</code></pre>
+<p><strong>Events:</strong></p>
+<ul>
+<li><code>INSERT</code>: New record created</li>
+<li><code>UPDATE</code>: Record modified</li>
+<li><code>DELETE</code>: Record deleted</li>
+<li><code>*</code>: All events</li>
+</ul>
+
+<footer style="margin-top: 60px; padding-top: 20px; border-top: 1px solid #ddd; color: #888; text-align: center;">
+    <p>Generated on 1/21/2026 | <a href="index.html">Back to Index</a></p>
+</footer>
+</body>
+</html>

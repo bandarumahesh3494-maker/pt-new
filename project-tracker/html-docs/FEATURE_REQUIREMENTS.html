@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FEATURE REQUIREMENTS</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            color: #333;
+        }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
+        h2 { color: #34495e; border-bottom: 2px solid #95a5a6; padding-bottom: 8px; margin-top: 30px; }
+        h3 { color: #7f8c8d; }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        blockquote {
+            border-left: 4px solid #3498db;
+            padding-left: 20px;
+            margin-left: 0;
+            color: #555;
+        }
+        a { color: #3498db; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        @media print {
+            body { padding: 0; }
+            pre { page-break-inside: avoid; }
+            h1, h2, h3 { page-break-after: avoid; }
+        }
+    </style>
+</head>
+<body>
+<h1>Project Tracker - Feature Requirements Document</h1>
+<h2>Executive Summary</h2>
+<p>The Project Tracker is a comprehensive multi-tenant project management system designed to help organizations track tasks, manage resources, and monitor project progress in real-time. Built on Supabase with a React frontend, it provides role-based access control, real-time collaboration, and powerful analytics.</p>
+<hr>
+<h2>1. User Management &amp; Authentication</h2>
+<h3>1.1 Authentication System</h3>
+<ul>
+<li><strong>Email/Password Authentication</strong>: Secure login using Supabase Auth</li>
+<li><strong>Session Management</strong>: Automatic session handling with token refresh</li>
+<li><strong>Protected Routes</strong>: Route-level security enforcement</li>
+</ul>
+<h3>1.2 Multi-Tenant Architecture (Realms)</h3>
+<ul>
+<li><strong>Realm Isolation</strong>: Complete data segregation between organizations</li>
+<li><strong>Realm-based Access</strong>: Users can only access data within their realm</li>
+<li><strong>Automatic Realm Assignment</strong>: New users are assigned to realms upon registration</li>
+</ul>
+<h3>1.3 Role-Based Access Control (RBAC)</h3>
+<ul>
+<li><strong>Owner</strong>: Full administrative access to realm</li>
+<li><strong>Realm Admin</strong>: Manage realm settings and users</li>
+<li><strong>Admin</strong>: Elevated permissions for data management</li>
+<li><strong>User</strong>: Standard access to view and edit assigned tasks</li>
+</ul>
+<hr>
+<h2>2. Task Management System</h2>
+<h3>2.1 Hierarchical Task Structure</h3>
+<ul>
+<li><strong>Tasks</strong>: Top-level work items with categories (Dev, Test, Infra, Support)</li>
+<li><strong>Subtasks</strong>: Breakdown of tasks into manageable units</li>
+<li><strong>Sub-Subtasks</strong>: Granular work items for detailed tracking</li>
+<li><strong>Three-Level Hierarchy</strong>: Task → Subtask → Sub-Subtask</li>
+</ul>
+<h3>2.2 Task Categorization</h3>
+<ul>
+<li><strong>Development (Dev)</strong>: Software development work</li>
+<li><strong>Testing (Test)</strong>: QA and testing activities</li>
+<li><strong>Infrastructure (Infra)</strong>: DevOps and infrastructure tasks</li>
+<li><strong>Support</strong>: Customer support and maintenance</li>
+</ul>
+<h3>2.3 Priority Management</h3>
+<ul>
+<li><strong>Priority Levels</strong>: 1 (High), 2 (Medium), 3 (Low)</li>
+<li><strong>Visual Priority Indicators</strong>: Star-based rating system</li>
+<li><strong>Priority-based Filtering</strong>: Sort and filter by priority</li>
+</ul>
+<h3>2.4 Task Assignment</h3>
+<ul>
+<li><strong>User Assignment</strong>: Assign tasks to specific team members</li>
+<li><strong>Multi-level Assignment</strong>: Assign at task, subtask, or sub-subtask level</li>
+<li><strong>Assignment Tracking</strong>: Track who is working on what</li>
+</ul>
+<hr>
+<h2>3. Milestone &amp; Timeline Management</h2>
+<h3>3.1 Milestone Creation</h3>
+<ul>
+<li><strong>Date-based Milestones</strong>: Set target dates for deliverables</li>
+<li><strong>Milestone Text</strong>: Descriptive text for each milestone</li>
+<li><strong>Multi-level Milestones</strong>: Attach to subtasks or sub-subtasks</li>
+<li><strong>Visual Timeline</strong>: See milestones on calendar view</li>
+</ul>
+<h3>3.2 Timeline Tracking</h3>
+<ul>
+<li><strong>Date Range Selection</strong>: View tasks across custom date ranges</li>
+<li><strong>Daily Timeline View</strong>: See all tasks scheduled for each day</li>
+<li><strong>Milestone Visualization</strong>: Visual indicators on timeline</li>
+</ul>
+<hr>
+<h2>4. Dashboard Views</h2>
+<h3>4.1 Timeline Dashboard</h3>
+<ul>
+<li><strong>Master View</strong>: Complete timeline of all tasks and milestones</li>
+<li><strong>Sticky Columns</strong>: Keep important columns visible while scrolling</li>
+<li><strong>Category Color Coding</strong>: Visual distinction between task types</li>
+<li><strong>Inline Editing</strong>: Quick task updates directly in the grid</li>
+</ul>
+<h3>4.2 Calendar Dashboard</h3>
+<ul>
+<li><strong>Monthly Calendar</strong>: Month-by-month view of milestones</li>
+<li><strong>Day Details</strong>: Click any day to see all associated tasks</li>
+<li><strong>Event Counts</strong>: Visual indicators of task density</li>
+<li><strong>Date Navigation</strong>: Easy navigation between months</li>
+</ul>
+<h3>4.3 Kanban Board</h3>
+<ul>
+<li><strong>Status Columns</strong>: Organize tasks by status (To Do, In Progress, Done)</li>
+<li><strong>Drag-and-Drop</strong>: Move tasks between columns</li>
+<li><strong>Task Cards</strong>: Rich task cards with assignee and details</li>
+<li><strong>Quick Updates</strong>: Fast status changes</li>
+</ul>
+<h3>4.4 Gantt Chart</h3>
+<ul>
+<li><strong>Visual Timeline</strong>: Bar chart view of task durations</li>
+<li><strong>Dependencies</strong>: See task relationships</li>
+<li><strong>Resource Allocation</strong>: Visualize team workload</li>
+<li><strong>Progress Tracking</strong>: Track completion percentage</li>
+</ul>
+<h3>4.5 Task List View</h3>
+<ul>
+<li><strong>Tabular Display</strong>: Simple list of all tasks</li>
+<li><strong>Advanced Filtering</strong>: Filter by category, assignee, status</li>
+<li><strong>Bulk Operations</strong>: Multi-select for batch updates</li>
+<li><strong>Export Capability</strong>: Export task lists</li>
+</ul>
+<h3>4.6 Engineer Breakdown</h3>
+<ul>
+<li><strong>Per-Engineer View</strong>: See all tasks assigned to each team member</li>
+<li><strong>Workload Analysis</strong>: Identify over/under-allocated resources</li>
+<li><strong>Task Distribution</strong>: Visual breakdown of task categories</li>
+<li><strong>Performance Metrics</strong>: Track completion rates</li>
+</ul>
+<h3>4.7 Performance Dashboard</h3>
+<ul>
+<li><strong>Completion Metrics</strong>: Track task completion rates</li>
+<li><strong>Time Analytics</strong>: Analyze time-to-completion</li>
+<li><strong>Trend Analysis</strong>: Identify performance trends</li>
+<li><strong>Team Comparisons</strong>: Compare engineer productivity</li>
+</ul>
+<h3>4.8 Task Delay Dashboard</h3>
+<ul>
+<li><strong>Overdue Tasks</strong>: Highlight tasks past their milestones</li>
+<li><strong>Delay Analysis</strong>: Calculate average delays</li>
+<li><strong>Risk Assessment</strong>: Identify high-risk tasks</li>
+<li><strong>Alert System</strong>: Flag critically delayed items</li>
+</ul>
+<h3>4.9 Resource Analysis</h3>
+<ul>
+<li><strong>Capacity Planning</strong>: Analyze team capacity vs. demand</li>
+<li><strong>Resource Utilization</strong>: Track how resources are utilized</li>
+<li><strong>Skill Mapping</strong>: Match tasks to engineer skills</li>
+<li><strong>Bottleneck Identification</strong>: Find resource constraints</li>
+</ul>
+<h3>4.10 History Dashboard</h3>
+<ul>
+<li><strong>Action Log</strong>: Complete audit trail of all changes</li>
+<li><strong>User Activity</strong>: Track who did what and when</li>
+<li><strong>Change Tracking</strong>: See before/after states</li>
+<li><strong>Compliance Reporting</strong>: Generate activity reports</li>
+</ul>
+<h3>4.11 Temporary Tasks</h3>
+<ul>
+<li><strong>Draft Tasks</strong>: Quick task capture before formal planning</li>
+<li><strong>Temporary Storage</strong>: Hold tasks before assignment</li>
+<li><strong>Status Tracking</strong>: Draft, Pending, Approved states</li>
+<li><strong>Conversion</strong>: Convert temp tasks to formal tasks</li>
+</ul>
+<hr>
+<h2>5. Configuration &amp; Customization</h2>
+<h3>5.1 Theme System</h3>
+<ul>
+<li><strong>Multiple Themes</strong>: 8 pre-built color themes<ul>
+<li>Dark Mode</li>
+<li>Blue Theme</li>
+<li>Green Theme</li>
+<li>Purple Theme</li>
+<li>Orange Theme</li>
+<li>Red Theme</li>
+<li>Teal Theme</li>
+<li>Pink Theme</li>
+</ul>
+</li>
+<li><strong>Theme Persistence</strong>: User preferences saved</li>
+<li><strong>Real-time Switching</strong>: Instant theme changes</li>
+</ul>
+<h3>5.2 Category Configuration</h3>
+<ul>
+<li><strong>Custom Colors</strong>: Set colors for each task category</li>
+<li><strong>Opacity Control</strong>: Adjust color transparency</li>
+<li><strong>Visual Consistency</strong>: Maintain consistent styling</li>
+</ul>
+<h3>5.3 User Settings</h3>
+<ul>
+<li><strong>Profile Management</strong>: Update name and email</li>
+<li><strong>Notification Preferences</strong>: Configure alerts</li>
+<li><strong>Display Preferences</strong>: Customize views</li>
+</ul>
+<hr>
+<h2>6. Real-time Collaboration</h2>
+<h3>6.1 Live Updates</h3>
+<ul>
+<li><strong>Real-time Sync</strong>: Changes appear instantly for all users</li>
+<li><strong>WebSocket Connection</strong>: Supabase real-time subscriptions</li>
+<li><strong>Conflict Resolution</strong>: Automatic handling of concurrent edits</li>
+</ul>
+<h3>6.2 Multi-user Editing</h3>
+<ul>
+<li><strong>Concurrent Access</strong>: Multiple users can work simultaneously</li>
+<li><strong>Optimistic Updates</strong>: UI updates before server confirmation</li>
+<li><strong>Change Notifications</strong>: See when others make changes</li>
+</ul>
+<hr>
+<h2>7. Data Security &amp; Privacy</h2>
+<h3>7.1 Row-Level Security (RLS)</h3>
+<ul>
+<li><strong>Realm Isolation</strong>: Users can only access their realm&#39;s data</li>
+<li><strong>Policy-based Access</strong>: Database-level security policies</li>
+<li><strong>Automatic Enforcement</strong>: Security enforced at database level</li>
+</ul>
+<h3>7.2 Authentication Security</h3>
+<ul>
+<li><strong>Secure Sessions</strong>: JWT-based authentication</li>
+<li><strong>Password Security</strong>: Bcrypt hashing</li>
+<li><strong>Session Expiry</strong>: Automatic timeout handling</li>
+</ul>
+<h3>7.3 Audit Trail</h3>
+<ul>
+<li><strong>Complete Logging</strong>: All actions logged to action_history</li>
+<li><strong>User Attribution</strong>: Track who made each change</li>
+<li><strong>Immutable Records</strong>: Audit logs cannot be modified</li>
+</ul>
+<hr>
+<h2>8. People &amp; Team Management</h2>
+<h3>8.1 People Management</h3>
+<ul>
+<li><strong>Add Team Members</strong>: Invite users to realm</li>
+<li><strong>Role Assignment</strong>: Set user roles</li>
+<li><strong>Profile Information</strong>: Manage user details</li>
+</ul>
+<h3>8.2 Team Filtering</h3>
+<ul>
+<li><strong>Filter by Person</strong>: View tasks for specific team members</li>
+<li><strong>Multi-person Filter</strong>: Filter across multiple team members</li>
+<li><strong>Assignment Visibility</strong>: See who is assigned to what</li>
+</ul>
+<hr>
+<h2>9. Data Import/Export</h2>
+<h3>9.1 Export Capabilities</h3>
+<ul>
+<li><strong>Task Export</strong>: Export tasks to CSV/JSON</li>
+<li><strong>Report Generation</strong>: Generate custom reports</li>
+<li><strong>Data Backup</strong>: Export complete realm data</li>
+</ul>
+<hr>
+<h2>10. Technical Requirements</h2>
+<h3>10.1 Frontend</h3>
+<ul>
+<li><strong>Framework</strong>: React 18+ with TypeScript</li>
+<li><strong>Styling</strong>: TailwindCSS</li>
+<li><strong>Routing</strong>: React Router v6</li>
+<li><strong>State Management</strong>: React Context API</li>
+<li><strong>Build Tool</strong>: Vite</li>
+</ul>
+<h3>10.2 Backend</h3>
+<ul>
+<li><strong>Database</strong>: PostgreSQL via Supabase</li>
+<li><strong>Authentication</strong>: Supabase Auth</li>
+<li><strong>Real-time</strong>: Supabase Realtime</li>
+<li><strong>API</strong>: Supabase REST API</li>
+</ul>
+<h3>10.3 Performance</h3>
+<ul>
+<li><strong>Fast Page Loads</strong>: &lt; 2 seconds initial load</li>
+<li><strong>Real-time Updates</strong>: &lt; 100ms latency</li>
+<li><strong>Responsive UI</strong>: 60 FPS animations</li>
+<li><strong>Optimized Queries</strong>: Efficient database access</li>
+</ul>
+<h3>10.4 Browser Support</h3>
+<ul>
+<li><strong>Modern Browsers</strong>: Chrome, Firefox, Safari, Edge (latest 2 versions)</li>
+<li><strong>Mobile Responsive</strong>: Full mobile support</li>
+<li><strong>Progressive Enhancement</strong>: Graceful degradation</li>
+</ul>
+<hr>
+<h2>11. User Experience</h2>
+<h3>11.1 Usability</h3>
+<ul>
+<li><strong>Intuitive Interface</strong>: Clear navigation and controls</li>
+<li><strong>Minimal Clicks</strong>: Reduce steps to complete actions</li>
+<li><strong>Keyboard Shortcuts</strong>: Power-user features</li>
+<li><strong>Error Handling</strong>: Clear error messages</li>
+</ul>
+<h3>11.2 Accessibility</h3>
+<ul>
+<li><strong>ARIA Labels</strong>: Screen reader support</li>
+<li><strong>Keyboard Navigation</strong>: Full keyboard access</li>
+<li><strong>Color Contrast</strong>: WCAG AA compliance</li>
+<li><strong>Focus Indicators</strong>: Clear focus states</li>
+</ul>
+<hr>
+<h2>12. Future Enhancements (Not Implemented)</h2>
+<h3>12.1 Potential Features</h3>
+<ul>
+<li><strong>Email Notifications</strong>: Task assignment alerts</li>
+<li><strong>File Attachments</strong>: Attach files to tasks</li>
+<li><strong>Comments System</strong>: Threaded discussions on tasks</li>
+<li><strong>Time Tracking</strong>: Log hours worked</li>
+<li><strong>Recurring Tasks</strong>: Automated task creation</li>
+<li><strong>Custom Fields</strong>: User-defined task properties</li>
+<li><strong>Advanced Reporting</strong>: Custom report builder</li>
+<li><strong>API Access</strong>: REST API for integrations</li>
+<li><strong>Mobile Apps</strong>: Native iOS/Android apps</li>
+<li><strong>Webhooks</strong>: External system integration</li>
+</ul>
+<hr>
+<h2>Glossary</h2>
+<ul>
+<li><strong>Realm</strong>: An organization or workspace that contains users and tasks</li>
+<li><strong>Profile</strong>: User account within a realm</li>
+<li><strong>Task</strong>: Top-level work item</li>
+<li><strong>Subtask</strong>: Second-level breakdown of a task</li>
+<li><strong>Sub-Subtask</strong>: Third-level granular work item</li>
+<li><strong>Milestone</strong>: A date-based goal or deliverable</li>
+<li><strong>RLS</strong>: Row-Level Security - database security mechanism</li>
+<li><strong>RBAC</strong>: Role-Based Access Control</li>
+</ul>
+
+<footer style="margin-top: 60px; padding-top: 20px; border-top: 1px solid #ddd; color: #888; text-align: center;">
+    <p>Generated on 1/21/2026 | <a href="index.html">Back to Index</a></p>
+</footer>
+</body>
+</html>
