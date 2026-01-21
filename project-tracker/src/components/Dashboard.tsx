@@ -18,7 +18,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 
 export const Dashboard: React.FC = () => {
-  const { groupedData, users, loading, error, refetch } = useTrackerData();
+  const { groupedData, users, loading, error } = useTrackerData();
   const { colors } = useTheme();
   const { milestoneOptions, rowColors, loading: configLoading } = useConfig();
   const { userProfile } = useAuth();
@@ -175,7 +175,6 @@ export const Dashboard: React.FC = () => {
         .eq('id', taskId)
         .eq('realm_id', userProfile.realm_id)
       if (error) throw error;
-      refetch();
     } catch (err) {
       console.error('Error updating category:', err);
     }
@@ -195,7 +194,6 @@ export const Dashboard: React.FC = () => {
         .eq('id', subtaskId)
         .eq('realm_id', userProfile.realm_id);
       if (error) throw error;
-       refetch();
     } catch (err) {
       console.error('Error updating assignment:', err);
     }
@@ -209,7 +207,6 @@ export const Dashboard: React.FC = () => {
         .eq('id', subSubtaskId)
         .eq('realm_id', userProfile.realm_id);
       if (error) throw error;
-      refetch();
     } catch (err) {
       console.error('Error updating sub-subtask assignment:', err);
     }
@@ -360,8 +357,6 @@ export const Dashboard: React.FC = () => {
           }
         }
       }
-
-      refetch();
     } catch (err) {
       console.error('Error adding milestone:', err);
     }
@@ -441,8 +436,6 @@ export const Dashboard: React.FC = () => {
         category: taskToDelete?.task.category
       },
     });
-
-    refetch();
   };
 
   const handleDeleteSubtask = async (subtaskId: string) => {
@@ -472,8 +465,6 @@ export const Dashboard: React.FC = () => {
         performedBy: userProfile?.email || '',
       });
     }
-
-    refetch();
   };
 
   const handleDeleteSubSubtask = async (subSubtaskId: string) => {
@@ -503,8 +494,6 @@ export const Dashboard: React.FC = () => {
         performedBy: userProfile?.email || '',
       });
     }
-
-    refetch();
   };
 
   const calculateActualMilestones = (subtasks: any[]) => {
@@ -1327,7 +1316,7 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      <AddTaskModal isOpen={showAddTask} onClose={() => setShowAddTask(false)} onSuccess={refetch}/>
+      <AddTaskModal isOpen={showAddTask} onClose={() => setShowAddTask(false)} onSuccess={() => {}}/>
       <AddPersonModal isOpen={showAddPerson} onClose={() => setShowAddPerson(false)} users={users} />
 
       {showAddSubtask && (
@@ -1336,7 +1325,7 @@ export const Dashboard: React.FC = () => {
           onClose={() => setShowAddSubtask(null)}
           taskId={showAddSubtask.taskId}
           taskName={showAddSubtask.taskName}
-          users={users} onSuccess={refetch}
+          users={users} onSuccess={() => {}}
         />
       )}
 
@@ -1346,7 +1335,7 @@ export const Dashboard: React.FC = () => {
           onClose={() => setShowAddSubSubtask(null)}
           subtaskId={showAddSubSubtask.subtaskId}
           subtaskName={showAddSubSubtask.subtaskName}
-          onSuccess={refetch}
+          onSuccess={() => {}}
         />
       )}
 
@@ -1368,7 +1357,7 @@ export const Dashboard: React.FC = () => {
                   .flatMap(st => st.subSubtasks)
                   .find(sst => sst.subSubtask.id === showMilestone.subSubtaskId)?.milestones || []
           }
-          onDataChange={refetch}
+          onDataChange={() => {}}
         />
       )}
 
@@ -1379,7 +1368,7 @@ export const Dashboard: React.FC = () => {
           taskId={showEditTask.taskId}
           taskName={showEditTask.taskName}
           taskPriority={showEditTask.taskPriority}
-          onSuccess={refetch}
+          onSuccess={() => {}}
         />
       )}
 
@@ -1389,7 +1378,7 @@ export const Dashboard: React.FC = () => {
           onClose={() => setShowEditSubtask(null)}
           subtaskId={showEditSubtask.subtaskId}
           subtaskName={showEditSubtask.subtaskName}
-          onSuccess={refetch}
+          onSuccess={() => {}}
         />
       )}
 
@@ -1400,7 +1389,7 @@ export const Dashboard: React.FC = () => {
           subSubtaskId={showEditSubSubtask.subSubtaskId}
           subSubtaskName={showEditSubSubtask.subSubtaskName}
           parentSubtaskName={showEditSubSubtask.parentSubtaskName}
-          onSuccess={refetch}
+          onSuccess={() => {}}
         />
       )}
 
