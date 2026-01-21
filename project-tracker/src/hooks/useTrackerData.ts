@@ -109,67 +109,76 @@ export const useTrackerData = () => {
 
     fetchData();
 
-    const channel = supabase.channel('tracker_changes');
+    const channelName = `tracker_realm_${currentRealm.id}`;
+    console.log('[Realtime] Setting up channel:', channelName);
 
-    channel
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, (payload) => {
+    const channel = supabase
+      .channel(channelName)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks', filter: `realm_id=eq.${currentRealm.id}` }, (payload) => {
         console.log('[Realtime] Task event:', payload.eventType, payload);
-        if (payload.eventType === 'INSERT' && payload.new.realm_id === currentRealm.id) {
+        if (payload.eventType === 'INSERT') {
           setTasks(prev => [...prev, payload.new as Task]);
-        } else if (payload.eventType === 'UPDATE' && payload.new.realm_id === currentRealm.id) {
+        } else if (payload.eventType === 'UPDATE') {
           setTasks(prev => prev.map(t => t.id === payload.new.id ? payload.new as Task : t));
-        } else if (payload.eventType === 'DELETE' && payload.old.realm_id === currentRealm.id) {
+        } else if (payload.eventType === 'DELETE') {
           setTasks(prev => prev.filter(t => t.id !== payload.old.id));
         }
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'subtasks' }, (payload) => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'subtasks', filter: `realm_id=eq.${currentRealm.id}` }, (payload) => {
         console.log('[Realtime] Subtask event:', payload.eventType, payload);
-        if (payload.eventType === 'INSERT' && payload.new.realm_id === currentRealm.id) {
+        if (payload.eventType === 'INSERT') {
           setSubtasks(prev => [...prev, payload.new as Subtask]);
-        } else if (payload.eventType === 'UPDATE' && payload.new.realm_id === currentRealm.id) {
+        } else if (payload.eventType === 'UPDATE') {
           setSubtasks(prev => prev.map(st => st.id === payload.new.id ? payload.new as Subtask : st));
-        } else if (payload.eventType === 'DELETE' && payload.old.realm_id === currentRealm.id) {
+        } else if (payload.eventType === 'DELETE') {
           setSubtasks(prev => prev.filter(st => st.id !== payload.old.id));
         }
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'sub_subtasks' }, (payload) => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'sub_subtasks', filter: `realm_id=eq.${currentRealm.id}` }, (payload) => {
         console.log('[Realtime] Sub-subtask event:', payload.eventType, payload);
-        if (payload.eventType === 'INSERT' && payload.new.realm_id === currentRealm.id) {
+        if (payload.eventType === 'INSERT') {
           setSubSubtasks(prev => [...prev, payload.new as SubSubtask]);
-        } else if (payload.eventType === 'UPDATE' && payload.new.realm_id === currentRealm.id) {
+        } else if (payload.eventType === 'UPDATE') {
           setSubSubtasks(prev => prev.map(sst => sst.id === payload.new.id ? payload.new as SubSubtask : sst));
-        } else if (payload.eventType === 'DELETE' && payload.old.realm_id === currentRealm.id) {
+        } else if (payload.eventType === 'DELETE') {
           setSubSubtasks(prev => prev.filter(sst => sst.id !== payload.old.id));
         }
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'milestones' }, (payload) => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'milestones', filter: `realm_id=eq.${currentRealm.id}` }, (payload) => {
         console.log('[Realtime] Milestone event:', payload.eventType, payload);
-        if (payload.eventType === 'INSERT' && payload.new.realm_id === currentRealm.id) {
+        if (payload.eventType === 'INSERT') {
           setMilestones(prev => [...prev, payload.new as Milestone]);
-        } else if (payload.eventType === 'UPDATE' && payload.new.realm_id === currentRealm.id) {
+        } else if (payload.eventType === 'UPDATE') {
           setMilestones(prev => prev.map(m => m.id === payload.new.id ? payload.new as Milestone : m));
-        } else if (payload.eventType === 'DELETE' && payload.old.realm_id === currentRealm.id) {
+        } else if (payload.eventType === 'DELETE') {
           setMilestones(prev => prev.filter(m => m.id !== payload.old.id));
         }
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, (payload) => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles', filter: `realm_id=eq.${currentRealm.id}` }, (payload) => {
         console.log('[Realtime] Profile event:', payload.eventType, payload);
-        if (payload.eventType === 'INSERT' && payload.new.realm_id === currentRealm.id) {
+        if (payload.eventType === 'INSERT') {
           setUsers(prev => [...prev, payload.new as User]);
-        } else if (payload.eventType === 'UPDATE' && payload.new.realm_id === currentRealm.id) {
+        } else if (payload.eventType === 'UPDATE') {
           setUsers(prev => prev.map(u => u.id === payload.new.id ? payload.new as User : u));
         } else if (payload.eventType === 'DELETE') {
           setUsers(prev => prev.filter(u => u.id !== payload.old.id));
         }
       })
-      .subscribe((status, err) => {
+      .subscribe((status) => {
         console.log('[Realtime] Subscription status:', status);
-        if (err) {
-          console.error('[Realtime] Subscription error:', err);
+        if (status === 'SUBSCRIBED') {
+          console.log('[Realtime] ✅ Successfully subscribed to real-time updates');
+        } else if (status === 'CHANNEL_ERROR') {
+          console.error('[Realtime] ❌ Channel error - real-time updates will not work');
+        } else if (status === 'TIMED_OUT') {
+          console.error('[Realtime] ⏱️ Subscription timed out - retrying...');
+        } else if (status === 'CLOSED') {
+          console.log('[Realtime] 🔌 Channel closed');
         }
       });
 
     return () => {
+      console.log('[Realtime] Cleaning up channel:', channelName);
       supabase.removeChannel(channel);
     };
   }, [currentRealm?.id]);
