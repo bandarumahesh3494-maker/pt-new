@@ -1,17 +1,15 @@
 import { createClient } from '@supabase/supabase-js';
-const supabaseUrl =  import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-// const supabaseUrl =  'https://xofpdygiyypubkjyyijr.supabase.co';
-// const supabaseAnonKey =  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhvZnBkeWdpeXlwdWJranl5aWpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ4NzkwMDIsImV4cCI6MjA4MDQ1NTAwMn0.izNmcZvwhDma6dEY_YsjFWga3yg07n4MlZve4yHgGy8';
-// const supabaseUrl = 'http://localhost:8000';
-// const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzYwMjE0ODk3LCJleHAiOjE5ODM4MTI5OTZ9.qxNXXWRHmEUR4V91j9uP0vvkAtJHVX75jMgoJFMkjS4'
-console.log('Supabase URL:', import.meta.env.VITE_SUPABASE_URL);
-console.log('Supabase Anon Key:', import.meta.env.VITE_SUPABASE_ANON_KEY );
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+console.log('[Supabase Config] URL:', supabaseUrl);
+console.log('[Supabase Config] Anon Key present:', !!supabaseAnonKey);
+
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
+  throw new Error('Missing Supabase environment variables. Check your .env file.');
 }
 
-// export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
