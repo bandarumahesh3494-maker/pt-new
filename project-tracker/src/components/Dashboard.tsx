@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { Plus, Calendar, UserPlus, Edit2, Trash2, Star, Eye, EyeOff, ChevronDown, ChevronRight } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Plus, Calendar, UserPlus, Edit2, Trash2, Star, Eye, EyeOff, ChevronDown, ChevronRight, RefreshCw } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { logAction } from '../lib/actionLogger';
 import { useTrackerData } from '../hooks/useTrackerData';
@@ -18,11 +18,13 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 
 export const Dashboard: React.FC = () => {
-  const { groupedData, users, loading, error } = useTrackerData();
+  const { groupedData, users, loading, error, refetch } = useTrackerData();
   const { colors } = useTheme();
   const { milestoneOptions, rowColors, loading: configLoading } = useConfig();
   const { userProfile } = useAuth();
   const isAdmin = userProfile?.role === 'admin';
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [autoRefresh, setAutoRefresh] = useState(false);
 
   const hexToRgba = (hex: string, alpha: number) => {
     if (!hex || typeof hex !== 'string') {
@@ -81,6 +83,23 @@ export const Dashboard: React.FC = () => {
   const [selectedEngineer, setSelectedEngineer] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'category' | 'priority'>('category');
   const [viewMode, setViewMode] = useState<'day' | 'week' | 'month'>('week');
+
+  const handleManualRefresh = async () => {
+    setIsRefreshing(true);
+    await refetch();
+    setTimeout(() => setIsRefreshing(false), 500);
+  };
+
+  useEffect(() => {
+    if (!autoRefresh) return;
+
+    const interval = setInterval(() => {
+      console.log('[Auto-refresh] Polling for updates...');
+      refetch();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [autoRefresh, refetch]);
 
   const dateRange = useMemo(() => {
     const dates: string[] = [];
@@ -571,6 +590,29 @@ export const Dashboard: React.FC = () => {
             <h1 className={`text-2xl font-bold ${colors.text}`}>Project Tracker</h1>
           </div>
           <div className="flex gap-3">
+            <button
+              onClick={handleManualRefresh}
+              disabled={isRefreshing}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all font-bold shadow-lg hover:shadow-xl transform hover:scale-105 ${
+                isRefreshing ? 'bg-gray-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+              } text-white`}
+              title="Manually refresh data"
+            >
+              <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
+            <button
+              onClick={() => setAutoRefresh(!autoRefresh)}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all font-bold shadow-lg hover:shadow-xl transform hover:scale-105 ${
+                autoRefresh
+                  ? 'bg-green-600 hover:bg-green-700 text-white'
+                  : 'bg-gray-600 hover:bg-gray-700 text-white'
+              }`}
+              title={autoRefresh ? 'Auto-refresh ON (every 5s)' : 'Auto-refresh OFF'}
+            >
+              <RefreshCw className={`w-5 h-5 ${autoRefresh ? 'animate-spin' : ''}`} />
+              Auto {autoRefresh ? 'ON' : 'OFF'}
+            </button>
             <select
               value={viewMode}
               onChange={(e) => setViewMode(e.target.value as 'day' | 'week' | 'month')}
