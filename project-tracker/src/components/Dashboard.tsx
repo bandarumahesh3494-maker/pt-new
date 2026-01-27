@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Plus, Calendar, UserPlus, Edit2, Trash2, Star, Eye, EyeOff, ChevronDown, ChevronRight, RefreshCw } from 'lucide-react';
+import { Plus, Calendar, UserPlus, Edit2, Trash2, Star, Eye, EyeOff, ChevronDown, ChevronRight, RefreshCw, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { logAction } from '../lib/actionLogger';
 import { useTrackerData } from '../hooks/useTrackerData';
@@ -25,6 +25,7 @@ export const Dashboard: React.FC = () => {
   const isAdmin = userProfile?.role === 'admin';
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(100);
 
   const hexToRgba = (hex: string, alpha: number) => {
     if (!hex || typeof hex !== 'string') {
@@ -90,6 +91,18 @@ export const Dashboard: React.FC = () => {
     setTimeout(() => setIsRefreshing(false), 500);
   };
 
+  const handleZoomIn = () => {
+    setZoomLevel(prev => Math.min(prev + 10, 200));
+  };
+
+  const handleZoomOut = () => {
+    setZoomLevel(prev => Math.max(prev - 10, 50));
+  };
+
+  const handleZoomReset = () => {
+    setZoomLevel(100);
+  };
+
   useEffect(() => {
     if (!autoRefresh) return;
 
@@ -100,6 +113,24 @@ export const Dashboard: React.FC = () => {
 
     return () => clearInterval(interval);
   }, [autoRefresh, refetch]);
+
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === '=') {
+        e.preventDefault();
+        handleZoomIn();
+      } else if ((e.ctrlKey || e.metaKey) && e.key === '-') {
+        e.preventDefault();
+        handleZoomOut();
+      } else if ((e.ctrlKey || e.metaKey) && e.key === '0') {
+        e.preventDefault();
+        handleZoomReset();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, []);
 
   const dateRange = useMemo(() => {
     const dates: string[] = [];
@@ -588,6 +619,34 @@ export const Dashboard: React.FC = () => {
           <div className="flex items-center gap-3">
             <Calendar className={`w-8 h-8 ${colors.accent.replace('bg-', 'text-')}`} />
             <h1 className={`text-2xl font-bold ${colors.text}`}>Project Tracker</h1>
+            <div className="flex items-center gap-2 ml-6 px-4 py-2 rounded-xl bg-gray-700/50 border border-gray-600">
+              <button
+                onClick={handleZoomOut}
+                disabled={zoomLevel <= 50}
+                className="p-1.5 rounded-lg bg-gray-600 hover:bg-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                title="Zoom Out (Ctrl + -)"
+              >
+                <ZoomOut className="w-4 h-4 text-white" />
+              </button>
+              <span className="text-sm font-semibold text-white min-w-[50px] text-center">
+                {zoomLevel}%
+              </span>
+              <button
+                onClick={handleZoomIn}
+                disabled={zoomLevel >= 200}
+                className="p-1.5 rounded-lg bg-gray-600 hover:bg-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                title="Zoom In (Ctrl + =)"
+              >
+                <ZoomIn className="w-4 h-4 text-white" />
+              </button>
+              <button
+                onClick={handleZoomReset}
+                className="p-1.5 rounded-lg bg-gray-600 hover:bg-gray-500 transition-all ml-1"
+                title="Reset Zoom (Ctrl + 0)"
+              >
+                <Maximize2 className="w-4 h-4 text-white" />
+              </button>
+            </div>
           </div>
           <div className="flex gap-3">
             <button
@@ -668,7 +727,14 @@ export const Dashboard: React.FC = () => {
 
       <div className="p-6">
         <div className="overflow-auto max-h-[calc(100vh-120px)] relative">
-          <table className="w-full border-collapse">
+          <div
+            style={{
+              transform: `scale(${zoomLevel / 100})`,
+              transformOrigin: 'top left',
+              transition: 'transform 0.2s ease-in-out'
+            }}
+          >
+            <table className="w-full border-collapse">
             <thead className="sticky top-0 z-30">
               <tr className={`${colors.headerBg} backdrop-blur border-b ${colors.border}`}>
                  <th className={`sticky left-0 z-40 ${colors.headerBg} border-2 ${colors.border} px-4 py-3 text-left font-semibold min-w-[60px]`} style={{ boxShadow: '4px 0 6px -2px rgba(0, 0, 0, 0.5)' }}>
@@ -1355,6 +1421,7 @@ export const Dashboard: React.FC = () => {
                 )}
               </tbody>
             </table>
+          </div>
         </div>
       </div>
 
