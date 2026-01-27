@@ -595,6 +595,40 @@ export const Dashboard: React.FC = () => {
       return true;
     }
 
+    // Check if user is assigned to any subtasks or sub-subtasks (for task entities)
+    // Find if this entity is a task by checking if it exists in groupedData
+    const taskGroup = groupedData.find(({ task }) => task.id === entity.id);
+    if (taskGroup) {
+      // This is a task - check all its subtasks and sub-subtasks
+      const isAssignedToSubtask = taskGroup.subtasks.some(({ subtask, subSubtasks }) => {
+        // Check if assigned to this subtask
+        if (subtask.assigned_to === userProfile.id) {
+          return true;
+        }
+        // Check if assigned to any sub-subtask
+        return subSubtasks.some(({ subSubtask }) => subSubtask.assigned_to === userProfile.id);
+      });
+      if (isAssignedToSubtask) {
+        return true;
+      }
+    }
+
+    // Check if user is assigned to any sub-subtasks (for subtask entities)
+    // Find if this entity is a subtask by checking all groupedData
+    for (const { subtasks } of groupedData) {
+      const subtaskGroup = subtasks.find(({ subtask }) => subtask.id === entity.id);
+      if (subtaskGroup) {
+        // This is a subtask - check all its sub-subtasks
+        const isAssignedToSubSubtask = subtaskGroup.subSubtasks.some(
+          ({ subSubtask }) => subSubtask.assigned_to === userProfile.id
+        );
+        if (isAssignedToSubSubtask) {
+          return true;
+        }
+        break;
+      }
+    }
+
     return false;
   };
 
