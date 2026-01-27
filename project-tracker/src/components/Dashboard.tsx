@@ -16,6 +16,7 @@ import { EditSubSubtaskModal } from './EditSubSubtaskModal';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
+import { getCreatorName } from '../utils/userUtils';
 
 export const Dashboard: React.FC = () => {
   const { groupedData, users, loading, error, refetch } = useTrackerData();
@@ -26,6 +27,9 @@ export const Dashboard: React.FC = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(100);
+
+  // Helper function to get creator name - usage: getCreatorName(task.created_by, users)
+  // or getCreatorName(subtask.created_by, users) or getCreatorName(subSubtask.created_by, users)
 
   const hexToRgba = (hex: string, alpha: number) => {
     if (!hex || typeof hex !== 'string') {
