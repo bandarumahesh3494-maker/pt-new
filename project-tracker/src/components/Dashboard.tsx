@@ -81,6 +81,7 @@ export const Dashboard: React.FC = () => {
   const [dateRangeEnd, setDateRangeEnd] = useState<string>('');
   const [hideClosedTasks, setHideClosedTasks] = useState(false);
   const [selectedEngineer, setSelectedEngineer] = useState<string>('all');
+  const [selectedTask, setSelectedTask] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'category' | 'priority'>('category');
   const [viewMode, setViewMode] = useState<'day' | 'week' | 'month'>('week');
    // ===================== ZOOM STATE =====================
@@ -684,6 +685,18 @@ const getCreatorName = (creatorId: string | null) => {
               <option value="month">Month View</option>
             </select>
             <TimeRangeSelector onRangeChange={handleRangeChange} />
+            <select
+              value={selectedTask}
+              onChange={(e) => setSelectedTask(e.target.value)}
+              className={`${colors.bgSecondary} border-0 ${colors.text} px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 font-semibold shadow-md hover:shadow-lg transition-all cursor-pointer`}
+            >
+              <option value="all">All Tasks</option>
+              {groupedData.map(({ task }) => (
+                <option key={task.id} value={task.id}>
+                  {task.name}
+                </option>
+              ))}
+            </select>
             {/* <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as 'category' | 'priority')}
@@ -768,6 +781,9 @@ const getCreatorName = (creatorId: string | null) => {
               <tbody>
                 {groupedData
                   .filter(({ task, subtasks }) => {
+                    if (selectedTask !== 'all' && task.id !== selectedTask) {
+                      return false;
+                    }
                     if (hideClosedTasks && isTaskClosed(subtasks)) {
                       return false;
                     }
