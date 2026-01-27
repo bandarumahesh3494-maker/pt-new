@@ -1,5 +1,5 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { Plus, Calendar, UserPlus, Edit2, Trash2, Star, Eye, EyeOff, ChevronDown, ChevronRight, RefreshCw, ZoomIn, ZoomOut, Maximize2, X } from 'lucide-react';
+import React, { useState, useMemo,useEffect  } from 'react';
+import { Plus, Calendar, UserPlus, Edit2, Trash2, Star, Eye, EyeOff, ChevronDown, ChevronRight,ZoomIn, ZoomOut, RefreshCcw  } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { logAction } from '../lib/actionLogger';
 import { useTrackerData } from '../hooks/useTrackerData';
@@ -16,7 +16,6 @@ import { EditSubSubtaskModal } from './EditSubSubtaskModal';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
-import { User } from '../types';
 
 export const Dashboard: React.FC = () => {
   const { groupedData, users, loading, error, refetch } = useTrackerData();
@@ -24,15 +23,6 @@ export const Dashboard: React.FC = () => {
   const { milestoneOptions, rowColors, loading: configLoading } = useConfig();
   const { userProfile } = useAuth();
   const isAdmin = userProfile?.role === 'admin';
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [autoRefresh, setAutoRefresh] = useState(false);
-  const [zoomLevel, setZoomLevel] = useState(100);
-
-  const getCreatorName = (createdBy: string | null): string => {
-    if (!createdBy) return 'Unknown';
-    const user = users.find(u => u.id === createdBy);
-    return user?.full_name || 'Unknown';
-  };
 
   const hexToRgba = (hex: string, alpha: number) => {
     if (!hex || typeof hex !== 'string') {
@@ -41,7 +31,8 @@ export const Dashboard: React.FC = () => {
     const r = parseInt(hex.slice(1, 3), 16);
     const g = parseInt(hex.slice(3, 5), 16);
     const b = parseInt(hex.slice(5, 7), 16);
-    return `rgba(${r}, ${g}, ${b}, ${alpha || 0.15})`;
+    // return `rgba(${r}, ${g}, ${b}, ${alpha || 0.15})`;
+    return hex
   };
 
   const hexToRgbaDark = (hex: string) => {
@@ -52,7 +43,8 @@ export const Dashboard: React.FC = () => {
     const g = parseInt(hex.slice(3, 5), 16);
     const b = parseInt(hex.slice(5, 7), 16);
     // Make it darker by reducing RGB values by 30% and keeping high opacity
-    return `rgba(${Math.floor(r * 0.7)}, ${Math.floor(g * 0.7)}, ${Math.floor(b * 0.7)}, 0.95)`;
+    // return `rgba(${Math.floor(r * 0.7)}, ${Math.floor(g * 0.7)}, ${Math.floor(b * 0.7)}, 0.95)`;
+    return hex
   };
 
   const getDynamicShadow = (hex: string) => {
@@ -89,48 +81,27 @@ export const Dashboard: React.FC = () => {
   const [dateRangeEnd, setDateRangeEnd] = useState<string>('');
   const [hideClosedTasks, setHideClosedTasks] = useState(false);
   const [selectedEngineer, setSelectedEngineer] = useState<string>('all');
-  const [selectedTask, setSelectedTask] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'category' | 'priority'>('category');
   const [viewMode, setViewMode] = useState<'day' | 'week' | 'month'>('week');
+   // ===================== ZOOM STATE =====================
+  const [zoomLevel, setZoomLevel] = useState(100);
 
-  const handleManualRefresh = async () => {
-    setIsRefreshing(true);
-    await refetch();
-    setTimeout(() => setIsRefreshing(false), 500);
-  };
+  const handleZoomIn = () => setZoomLevel(z => Math.min(z + 10, 200));
+  const handleZoomOut = () => setZoomLevel(z => Math.max(z - 10, 50));
+  const handleZoomReset = () => setZoomLevel(100);
 
-  const handleZoomIn = () => {
-    setZoomLevel(prev => Math.min(prev + 10, 200));
-  };
-
-  const handleZoomOut = () => {
-    setZoomLevel(prev => Math.max(prev - 10, 50));
-  };
-
-  const handleZoomReset = () => {
-    setZoomLevel(100);
-  };
-
-  useEffect(() => {
-    if (!autoRefresh) return;
-
-    const interval = setInterval(() => {
-      console.log('[Auto-refresh] Polling for updates...');
-      refetch();
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [autoRefresh, refetch]);
-
+  // ===================== KEYBOARD SHORTCUTS =====================
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === '=') {
         e.preventDefault();
         handleZoomIn();
-      } else if ((e.ctrlKey || e.metaKey) && e.key === '-') {
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === '-') {
         e.preventDefault();
         handleZoomOut();
-      } else if ((e.ctrlKey || e.metaKey) && e.key === '0') {
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === '0') {
         e.preventDefault();
         handleZoomReset();
       }
@@ -233,6 +204,7 @@ export const Dashboard: React.FC = () => {
         .eq('id', taskId)
         .eq('realm_id', userProfile.realm_id)
       if (error) throw error;
+      refetch();
     } catch (err) {
       console.error('Error updating category:', err);
     }
@@ -252,6 +224,7 @@ export const Dashboard: React.FC = () => {
         .eq('id', subtaskId)
         .eq('realm_id', userProfile.realm_id);
       if (error) throw error;
+       refetch();
     } catch (err) {
       console.error('Error updating assignment:', err);
     }
@@ -265,6 +238,7 @@ export const Dashboard: React.FC = () => {
         .eq('id', subSubtaskId)
         .eq('realm_id', userProfile.realm_id);
       if (error) throw error;
+      refetch();
     } catch (err) {
       console.error('Error updating sub-subtask assignment:', err);
     }
@@ -415,6 +389,8 @@ export const Dashboard: React.FC = () => {
           }
         }
       }
+
+      refetch();
     } catch (err) {
       console.error('Error adding milestone:', err);
     }
@@ -444,7 +420,11 @@ export const Dashboard: React.FC = () => {
     });
   };
 
-
+const getCreatorName = (creatorId: string | null) => {
+    if (!creatorId) return 'Unknown';
+    const creator = users.find(u => u.id === creatorId);
+    return creator ? creator.email : 'Unknown';
+  }
   const handleDeleteTask = async (taskId: string) => {
     const taskToDelete = groupedData.find(({ task }) => task.id === taskId);
     const taskName = taskToDelete?.task.name || 'Unknown Task';
@@ -494,6 +474,8 @@ export const Dashboard: React.FC = () => {
         category: taskToDelete?.task.category
       },
     });
+
+    refetch();
   };
 
   const handleDeleteSubtask = async (subtaskId: string) => {
@@ -523,6 +505,8 @@ export const Dashboard: React.FC = () => {
         performedBy: userProfile?.email || '',
       });
     }
+
+    refetch();
   };
 
   const handleDeleteSubSubtask = async (subSubtaskId: string) => {
@@ -552,6 +536,8 @@ export const Dashboard: React.FC = () => {
         performedBy: userProfile?.email || '',
       });
     }
+
+    refetch();
   };
 
   const calculateActualMilestones = (subtasks: any[]) => {
@@ -602,8 +588,6 @@ export const Dashboard: React.FC = () => {
       return true;
     }
 
-    // Check if user is assigned to any subtasks or sub-subtasks (for task entities)
-    // Find if this entity is a task by checking if it exists in groupedData
     const taskGroup = groupedData.find(({ task }) => task.id === entity.id);
     if (taskGroup) {
       // This is a task - check all its subtasks and sub-subtasks
@@ -620,8 +604,6 @@ export const Dashboard: React.FC = () => {
       }
     }
 
-    // Check if user is assigned to any sub-subtasks (for subtask entities)
-    // Find if this entity is a subtask by checking all groupedData
     for (const { subtasks } of groupedData) {
       const subtaskGroup = subtasks.find(({ subtask }) => subtask.id === entity.id);
       if (subtaskGroup) {
@@ -639,9 +621,10 @@ export const Dashboard: React.FC = () => {
     return false;
   };
 
+
   if (loading || configLoading) {
     return (
-      <div className={`min-h-screen ${colors.bg} flex items-center justify-center`}>
+      <div className={`min-h-screen bg-transparent flex items-center justify-center`}>
         <div className={`${colors.text} text-xl font-bold animate-pulse`}>Loading...</div>
       </div>
     );
@@ -652,7 +635,7 @@ export const Dashboard: React.FC = () => {
         <div className="text-rose-400 text-xl font-bold">Error: {error}</div>
       </div>
     );
-  } 
+  }
 
   return (
     <div className={`min-h-screen ${colors.bg} ${colors.text}`}>
@@ -660,8 +643,8 @@ export const Dashboard: React.FC = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Calendar className={`w-8 h-8 ${colors.accent.replace('bg-', 'text-')}`} />
-            <h1 className={`text-2xl font-bold ${colors.text}`}>Project Tracker</h1>
-            <div className="flex items-center gap-2 ml-6 px-4 py-2 rounded-xl bg-gray-700/50 border border-gray-600">
+            <h1 className={`text-2xl font-bold ${colors.text}`}>EZ-Project</h1>
+              <div className="flex items-center gap-2 ml-6 px-4 py-2 rounded-xl bg-gray-700/50 border border-gray-600">
               <button
                 onClick={handleZoomOut}
                 disabled={zoomLevel <= 50}
@@ -686,34 +669,11 @@ export const Dashboard: React.FC = () => {
                 className="p-1.5 rounded-lg bg-gray-600 hover:bg-gray-500 transition-all ml-1"
                 title="Reset Zoom (Ctrl + 0)"
               >
-                <Maximize2 className="w-4 h-4 text-white" />
+                <RefreshCcw  className="w-4 h-4 text-white" />
               </button>
             </div>
           </div>
           <div className="flex gap-3">
-            <button
-              onClick={handleManualRefresh}
-              disabled={isRefreshing}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all font-bold shadow-lg hover:shadow-xl transform hover:scale-105 ${
-                isRefreshing ? 'bg-gray-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
-              } text-white`}
-              title="Manually refresh data"
-            >
-              <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
-              Refresh
-            </button>
-            <button
-              onClick={() => setAutoRefresh(!autoRefresh)}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all font-bold shadow-lg hover:shadow-xl transform hover:scale-105 ${
-                autoRefresh
-                  ? 'bg-green-600 hover:bg-green-700 text-white'
-                  : 'bg-gray-600 hover:bg-gray-700 text-white'
-              }`}
-              title={autoRefresh ? 'Auto-refresh ON (every 5s)' : 'Auto-refresh OFF'}
-            >
-              <RefreshCw className={`w-5 h-5 ${autoRefresh ? 'animate-spin' : ''}`} />
-              Auto {autoRefresh ? 'ON' : 'OFF'}
-            </button>
             <select
               value={viewMode}
               onChange={(e) => setViewMode(e.target.value as 'day' | 'week' | 'month')}
@@ -744,32 +704,6 @@ export const Dashboard: React.FC = () => {
                 </option>
               ))}
             </select>
-            <select
-              value={selectedTask}
-              onChange={(e) => setSelectedTask(e.target.value)}
-              className={`${colors.bgSecondary} border-0 ${colors.text} px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 font-semibold shadow-md hover:shadow-lg transition-all cursor-pointer max-w-[250px]`}
-            >
-              <option value="all">All Tasks</option>
-              {groupedData.map(({ task }) => (
-                <option key={task.id} value={task.id}>
-                  {task.name.length > 30 ? task.name.substring(0, 30) + '...' : task.name}
-                </option>
-              ))}
-            </select>
-            {(selectedEngineer !== 'all' || selectedTask !== 'all' || hideClosedTasks) && (
-              <button
-                onClick={() => {
-                  setSelectedEngineer('all');
-                  setSelectedTask('all');
-                  setHideClosedTasks(false);
-                }}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all font-bold shadow-lg hover:shadow-xl transform hover:scale-105 bg-gray-600 hover:bg-gray-700 text-white"
-                title="Clear all filters"
-              >
-                <X className="w-4 h-4" />
-                Clear Filters
-              </button>
-            )}
             <button
               onClick={() => setHideClosedTasks(!hideClosedTasks)}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all font-bold shadow-lg hover:shadow-xl transform hover:scale-105 ${
@@ -795,14 +729,15 @@ export const Dashboard: React.FC = () => {
 
       <div className="p-6">
         <div className="overflow-auto max-h-[calc(100vh-120px)] relative">
-          <div
+               <div
             style={{
               transform: `scale(${zoomLevel / 100})`,
               transformOrigin: 'top left',
-              transition: 'transform 0.2s ease-in-out'
+              transition: 'transform 0.2s ease-in-out',
+              width: `${100 / (zoomLevel / 100)}%`,
             }}
           >
-            <table className="w-full border-collapse">
+          <table className="w-full border-collapse">
             <thead className="sticky top-0 z-30">
               <tr className={`${colors.headerBg} backdrop-blur border-b ${colors.border}`}>
                  <th className={`sticky left-0 z-40 ${colors.headerBg} border-2 ${colors.border} px-4 py-3 text-left font-semibold min-w-[60px]`} style={{ boxShadow: '4px 0 6px -2px rgba(0, 0, 0, 0.5)' }}>
@@ -811,7 +746,7 @@ export const Dashboard: React.FC = () => {
                 <th className={`sticky left-[60px] z-40 ${colors.headerBg} border-2 ${colors.border} px-4 py-3 text-left font-semibold min-w-[120px]`} style={{ boxShadow: '4px 0 6px -2px rgba(0, 0, 0, 0.5)' }}>
                   Category
                 </th>
-                <th className={`sticky left-[180px] z-40 ${colors.headerBg} border-2 ${colors.border} px-4 py-3 text-left font-semibold min-w-[180px]`} style={{ boxShadow: '4px 0 6px -2px rgba(0, 0, 0, 0.5)' }}>
+                <th className={`sticky left-[180px] min-w-[234px] z-40 ${colors.headerBg} border-2 ${colors.border} px-4 py-3 text-left font-semibold min-w-[180px]`} style={{ boxShadow: '4px 0 6px -2px rgba(0, 0, 0, 0.5)' }}>
                   Task Name
                 </th>
                 <th className={`sticky left-[412px] z-40 ${colors.headerBg} border-2 ${colors.border} px-4 py-3 text-left font-semibold min-w-[150px]`} style={{ boxShadow: '4px 0 6px -2px rgba(0, 0, 0, 0.5)' }}>
@@ -844,9 +779,6 @@ export const Dashboard: React.FC = () => {
                         return false;
                       }
                     }
-                    if (selectedTask !== 'all' && task.id !== selectedTask) {
-                      return false;
-                    }
                     return true;
                   })
                   .sort((a, b) => {
@@ -872,7 +804,7 @@ export const Dashboard: React.FC = () => {
 
                   const hasExpandedPlanned = plannedSubtask && plannedSubtask.subSubtasks.length > 0 && !collapsedSubtasks.has(plannedSubtask.subtask.id);
                   const hasExpandedActual = !isActualCollapsed && displayedSubtasks.some(s => s.subSubtasks.length > 0 && !collapsedSubtasks.has(s.subtask.id));
-                  const engineerLeadPosition = (hasExpandedPlanned || hasExpandedActual) ? 'left-[600px]' : 'left-[562px]';
+                  const engineerLeadPosition = (hasExpandedPlanned || hasExpandedActual) ? 'left-[562px]' : 'left-[562px]';
 
                   return (
                     <React.Fragment key={task.id}>
@@ -892,7 +824,7 @@ export const Dashboard: React.FC = () => {
                               <option value="support" className={colors.bgTertiary}>SUPPORT</option>
                             </select>
                           </td>
-                          <td className={`sticky left-[180px] z-20 border-2 ${colors.border} px-4 py-3 font-medium`} style={{ backgroundColor: colors.stickyColBg, boxShadow: '4px 0 6px -2px rgba(0, 0, 0, 0.3)' }}>
+                          <td className={`sticky left-[180px] min-w-[234px] z-20 border-2 ${colors.border} px-4 py-3 font-medium`} style={{ backgroundColor: colors.stickyColBg, boxShadow: '4px 0 6px -2px rgba(0, 0, 0, 0.3)' }}>
                             <div className="flex items-center gap-2">
                               <div className="flex items-center gap-1">
                                 {[1, 2, 3].map((star) => (
@@ -941,7 +873,7 @@ export const Dashboard: React.FC = () => {
                           {/* PLANNED Row */}
                           {plannedSubtask && (
                             <>
-                              <tr style={{ backgroundColor: hexToRgba(rowColors.planned, rowColors.plannedOpacity) }} className={colors.text}>
+                              <tr style={{ backgroundColor: hexToRgba(rowColors.subtask, rowColors.subtaskOpacity) }} className={colors.text}>
                             <td rowSpan={totalRows} className={`sticky left-0 z-20 border-2 ${colors.border} px-4`} style={{ backgroundColor: hexToRgbaDark(rowColors.planned), boxShadow: getDynamicShadow(rowColors.planned) }}>{index + 1}</td>
 
                                 <td rowSpan={totalRows} className={`sticky left-[60px] z-20 border-2 ${colors.border} px-2 py-3 ${getCategoryColor(task.category)}`} style={{ boxShadow: getDynamicShadow(rowColors.planned) }}>
@@ -956,20 +888,9 @@ export const Dashboard: React.FC = () => {
                                     <option value="support" className={colors.bgTertiary}>SUPPORT</option>
                                   </select>
                                 </td>
-                                <td rowSpan={totalRows} className={`sticky left-[180px] z-20 border-2 ${colors.border} px-4 py-3`} style={{ backgroundColor: hexToRgbaDark(rowColors.planned), boxShadow: getDynamicShadow(rowColors.planned) }}>
+                                <td rowSpan={totalRows} className={`sticky left-[180px] min-w-[234px] z-20 border-2 ${colors.border} px-4 py-3`} style={{ backgroundColor: hexToRgbaDark(rowColors.planned), boxShadow: getDynamicShadow(rowColors.planned) }}>
                                   <div className="font-medium flex items-center gap-2">
-                                    <div className="flex items-center gap-1">
-                                      {[1, 2, 3].map((star) => (
-                                        <Star
-                                          key={star}
-                                          className={`w-4 h-4 transition-colors ${
-                                            star <= (task.priority || 2)
-                                              ? 'fill-yellow-400 text-yellow-400'
-                                              : 'text-slate-500'
-                                          }`}
-                                        />
-                                      ))}
-                                    </div>
+
                                     {task.name}
                                     <button disabled={!canEditTask(task)}
                                       onClick={() => setShowEditTask({ taskId: task.id, taskName: task.name, taskPriority: task.priority || 2 })}
@@ -986,6 +907,18 @@ export const Dashboard: React.FC = () => {
                                       <Trash2 className="w-3 h-3" />
                                     </button>
                                   </div>
+                                    <div className="flex items-center gap-1">
+                                      {[1, 2, 3].map((star) => (
+                                        <Star
+                                          key={star}
+                                          className={`w-4 h-4 transition-colors ${
+                                            star <= (task.priority || 2)
+                                              ? 'fill-yellow-400 text-yellow-400'
+                                              : 'text-slate-500'
+                                          }`}
+                                        />
+                                      ))}
+                                    </div>
                                   <button disabled={!canEditTask(task)}
                                     onClick={() => setShowAddSubtask({ taskId: task.id, taskName: task.name })}
                                     className="text-sky-400 hover:text-sky-300 hover:scale-110 text-xs flex items-center gap-1 mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -993,16 +926,35 @@ export const Dashboard: React.FC = () => {
                                     <Plus className="w-3 h-3" />
                                     Add Subtask
                                   </button>
-                                  {otherSubtasks.length > 0 && (
-                                    <button disabled={!canEditTask(task)}
+                                 {otherSubtasks.length > 0 && (
+                                    <button
+                                      disabled={!canEditTask(task)}
                                       onClick={() => toggleTaskSubtasks(task.id)}
                                       className={`${colors.textSecondary} hover:${colors.text} text-xs flex items-center gap-1 mt-2 disabled:opacity-50 disabled:cursor-not-allowed`}
                                     >
-                                      {isActualCollapsed ? 'Show Subtasks' : 'Hide Subtasks'}
+                                      {isActualCollapsed ? (
+                                        <>
+                                          <Eye className="w-4 h-4" />
+                                          Show Subtasks
+                                        </>
+                                      ) : (
+                                        <>
+                                          <EyeOff className="w-4 h-4" />
+                                          Hide Subtasks
+                                        </>
+                                      )}
                                     </button>
                                   )}
+
+                                  {/* Created By (for task or subtask) */}
+                                  {task.created_by && (
+                                    <p className="text-xs text-gray-400 mt-1 ">
+                                      Created by: <span className="text-gray-300">{getCreatorName(task.created_by)}</span>
+                                    </p>
+                                  )}
+
                                 </td>
-                                <td className="sticky left-[412px] z-20 border-2 ${colors.border} px-4 py-3 font-semibold" style={{ backgroundColor: hexToRgbaDark(rowColors.planned), boxShadow: getDynamicShadow(rowColors.planned) }}>
+                                <td className="sticky left-[412px] z-20  ${colors.border} px-4 py-3 font-semibold" style={{ backgroundColor: hexToRgbaDark(rowColors.planned), boxShadow: getDynamicShadow(rowColors.planned) }}>
                                   <div className="flex items-center gap-2">
                                     {plannedSubtask.subSubtasks.length > 0 && (
                                       <button
@@ -1017,7 +969,7 @@ export const Dashboard: React.FC = () => {
                                         )}
                                       </button>
                                     )}
-                                    <div>{plannedSubtask.subtask.name}</div>
+                                    <div><span className="text-[13px]">{plannedSubtask.subtask.name}</span></div>
                                     {plannedSubtask.subSubtasks.length > 0 && (
                                       <span className="text-xs ${colors.bgTertiary}/20 px-2 py-0.5 rounded-full">
                                         {plannedSubtask.subSubtasks.length}
@@ -1031,6 +983,11 @@ export const Dashboard: React.FC = () => {
                                     <Plus className="w-3 h-3" />
                                     Add Sub-Subtask
                                   </button>
+                                  {plannedSubtask.subtask.created_by && (
+                                    <p className="text-[10px] text-gray-400 mt-1 ">
+                                      Created by: <span className="text-gray-300">{getCreatorName(plannedSubtask.subtask.created_by)}</span>
+                                    </p>
+                                  )}
                                 </td>
                                 <td className={`sticky ${engineerLeadPosition} z-10 border-2 ${colors.border} px-2 py-3`} style={{ backgroundColor: hexToRgbaDark(rowColors.planned), boxShadow: getDynamicShadow(rowColors.planned) }}>
                                   <select disabled={!canEditTask(plannedSubtask.subtask)}
@@ -1098,10 +1055,10 @@ export const Dashboard: React.FC = () => {
                               </tr>
                               {/* PLANNED Sub-Subtasks */}
                               {!collapsedSubtasks.has(plannedSubtask.subtask.id) && plannedSubtask.subSubtasks.map(sst => (
-                                <tr key={sst.subSubtask.id} style={{ backgroundColor: hexToRgba(rowColors.planned, rowColors.subSubtaskOpacity) }} className={colors.text}>
-                                  <td className={`sticky left-[412px] z-20 border-2 ${colors.border} px-4 py-3 pl-8`} style={{ backgroundColor: hexToRgbaDark(rowColors.planned), boxShadow: getDynamicShadow(rowColors.planned) }}>
+                                <tr key={sst.subSubtask.id} style={{ backgroundColor: hexToRgba(rowColors.subSubtask, rowColors.subSubtaskOpacity) }} className={colors.text}>
+                                  <td className={`sticky left-[412px] z-20 border-2 ${colors.border} px-4 py-3 pl-4`} style={{ backgroundColor: hexToRgbaDark(rowColors.subSubtask), boxShadow: getDynamicShadow(rowColors.planned) }}>
                                     <div className="flex items-center gap-2">
-                                      <span className={colors.textSecondary}>↳</span> {sst.subSubtask.name}
+                                      <span className={colors.textSecondary}>↳</span> <span className="text-[13px]">{sst.subSubtask.name}</span>
                                       <button disabled={!canEditTask(sst.subSubtask)}
                                         onClick={() => setShowEditSubSubtask({ subSubtaskId: sst.subSubtask.id, subSubtaskName: sst.subSubtask.name, parentSubtaskName: plannedSubtask.subtask.name })}
                                         className="text-sky-400 hover:text-sky-300 hover:scale-110 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -1116,9 +1073,15 @@ export const Dashboard: React.FC = () => {
                                       >
                                         <Trash2 className="w-3 h-3" />
                                       </button>
+
                                     </div>
+                                    {sst.subSubtask.created_by && (
+                                    <p className="text-[10px] text-gray-400 mt-1 ">
+                                      Created by: <span className="text-gray-300">{getCreatorName(sst.subSubtask.created_by)}</span>
+                                    </p>
+                                  )}
                                   </td>
-                                  <td className={`sticky ${engineerLeadPosition} z-10 border-2 ${colors.border} px-2 py-3`} style={{ backgroundColor: hexToRgbaDark(rowColors.planned), boxShadow: getDynamicShadow(rowColors.planned) }}>
+                                  <td className={`sticky ${engineerLeadPosition} z-10 border-2 ${colors.border} px-2 py-3`} style={{ backgroundColor: hexToRgbaDark(rowColors.subSubtask), boxShadow: getDynamicShadow(rowColors.planned) }}>
                                     <select disabled={!canEditTask(sst.subSubtask)}
                                       value={sst.subSubtask.assigned_to || ''}
                                       onChange={(e) => handleSubSubtaskAssignmentChange(sst.subSubtask.id, e.target.value || null)}
@@ -1135,7 +1098,7 @@ export const Dashboard: React.FC = () => {
                                   {dateRange.map(date => {
                                     const milestonesForDate = sst.milestones.filter(m => m.milestone_date === date);
                                     return (
-                                      <td key={date} className={`border ${colors.border} px-2 py-2 align-top`} style={{ backgroundColor: hexToRgba(rowColors.planned, rowColors.subSubtaskOpacity) }}>
+                                      <td key={date} className={`border ${colors.border} px-2 py-2 align-top`} style={{ backgroundColor: hexToRgba(rowColors.subSubtask, rowColors.subSubtaskOpacity) }}>
                                         <div className="space-y-1">
                                           {milestonesForDate.map(milestone => (
                                             <div
@@ -1204,7 +1167,7 @@ export const Dashboard: React.FC = () => {
                                     <option value="support" className={colors.bgTertiary}>SUPPORT</option>
                                   </select>
                                 </td>
-                                <td rowSpan={totalRows} className={`sticky left-[180px] z-20 border-2 ${colors.border} px-4 py-3`} style={{ backgroundColor: hexToRgbaDark(rowColors.actual), boxShadow: getDynamicShadow(rowColors.actual) }}>
+                                <td rowSpan={totalRows} className={`sticky left-[180px] min-w-[234px] z-20 border-2 ${colors.border} px-4 py-3`} style={{ backgroundColor: hexToRgbaDark(rowColors.actual), boxShadow: getDynamicShadow(rowColors.actual) }}>
                                   <div className="font-medium flex items-center gap-2">
                                     {task.name}
                                     <button disabled={!canEditTask(task)}
@@ -1255,7 +1218,7 @@ export const Dashboard: React.FC = () => {
                                     )}
                                   </button>
                                 )}
-                                <div>ACTUAL</div>
+                                <div><span className="text-[13px]">ACTUAL</span></div>
                                 {otherSubtasks.length > 0 && (
                                   <span className="text-xs ${colors.bgTertiary}/20 px-2 py-0.5 rounded-full">
                                     {otherSubtasks.length}
@@ -1297,7 +1260,7 @@ export const Dashboard: React.FC = () => {
                                         )}
                                       </button>
                                     )}
-                                    {st.subtask.name}
+                                  <span className="text-[13px]">{st.subtask.name}</span>
                                     {st.subSubtasks.length > 0 && (
                                       <span className="text-xs ${colors.bgTertiary}/20 px-2 py-0.5 rounded-full">
                                         {st.subSubtasks.length}
@@ -1325,6 +1288,11 @@ export const Dashboard: React.FC = () => {
                                     <Plus className="w-3 h-3" />
                                     Add Sub-Subtask
                                   </button>
+                                     {st.subtask.created_by && (
+                                    <p className="text-[10px] text-gray-400 mt-1 ">
+                                      Created by: <span className="text-gray-300">{getCreatorName(st.subtask.created_by)}</span>
+                                    </p>
+                                  )}
                                 </td>
                                 <td className={`sticky ${engineerLeadPosition} z-10 border-2 ${colors.border} px-2 py-3`} style={{ backgroundColor: hexToRgbaDark(rowColors.subtask), boxShadow: getDynamicShadow(rowColors.subtask) }}>
                                   <select disabled={!canEditTask(st.subtask)}
@@ -1392,9 +1360,9 @@ export const Dashboard: React.FC = () => {
                               </tr>
                               {!collapsedSubtasks.has(st.subtask.id) && st.subSubtasks.map(sst => (
                                 <tr key={sst.subSubtask.id} style={{ backgroundColor: hexToRgba(rowColors.subSubtask, rowColors.subSubtaskOpacity) }} className={`hover:${colors.bgTertiary}/50 transition-colors`}>
-                                  <td className={`sticky left-[412px] z-20 border-2 ${colors.border} px-4 py-3 pl-8`} style={{ backgroundColor: hexToRgbaDark(rowColors.subSubtask), boxShadow: getDynamicShadow(rowColors.subSubtask) }}>
+                                  <td className={`sticky left-[412px] z-20 border-2 ${colors.border} px-4 py-3 pl-4`} style={{ backgroundColor: hexToRgbaDark(rowColors.subSubtask), boxShadow: getDynamicShadow(rowColors.subSubtask) }}>
                                     <div className="flex items-center gap-2">
-                                      <span className={colors.textSecondary}>↳</span> {sst.subSubtask.name}
+                                      <span className={colors.textSecondary}>↳</span> <span className="text-[13px]">{sst.subSubtask.name}</span>
                                       <button disabled={!canEditTask(sst.subSubtask)}
                                         onClick={() => setShowEditSubSubtask({ subSubtaskId: sst.subSubtask.id, subSubtaskName: sst.subSubtask.name, parentSubtaskName: st.subtask.name })}
                                         className="text-sky-400 hover:text-sky-300 hover:scale-110 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -1409,7 +1377,13 @@ export const Dashboard: React.FC = () => {
                                       >
                                         <Trash2 className="w-3 h-3" />
                                       </button>
+
                                     </div>
+                                    {sst.subSubtask.created_by && (
+                                    <p className="text-[10px] text-gray-400 mt-1 ">
+                                      Created by: <span className="text-gray-300">{getCreatorName(sst.subSubtask.created_by)}</span>
+                                    </p>
+                                  )}
                                   </td>
                                   <td className={`sticky ${engineerLeadPosition} z-10 border-2 ${colors.border} px-2 py-3`} style={{ backgroundColor: hexToRgbaDark(rowColors.subSubtask), boxShadow: getDynamicShadow(rowColors.subSubtask) }}>
                                     <select disabled={!canEditTask(sst.subSubtask)}
@@ -1492,11 +1466,11 @@ export const Dashboard: React.FC = () => {
                 )}
               </tbody>
             </table>
-          </div>
+            </div>
         </div>
       </div>
 
-      <AddTaskModal isOpen={showAddTask} onClose={() => setShowAddTask(false)} onSuccess={() => {}}/>
+      <AddTaskModal isOpen={showAddTask} onClose={() => setShowAddTask(false)} onSuccess={refetch}/>
       <AddPersonModal isOpen={showAddPerson} onClose={() => setShowAddPerson(false)} users={users} />
 
       {showAddSubtask && (
@@ -1505,7 +1479,7 @@ export const Dashboard: React.FC = () => {
           onClose={() => setShowAddSubtask(null)}
           taskId={showAddSubtask.taskId}
           taskName={showAddSubtask.taskName}
-          users={users} onSuccess={() => {}}
+          users={users} onSuccess={refetch}
         />
       )}
 
@@ -1515,7 +1489,7 @@ export const Dashboard: React.FC = () => {
           onClose={() => setShowAddSubSubtask(null)}
           subtaskId={showAddSubSubtask.subtaskId}
           subtaskName={showAddSubSubtask.subtaskName}
-          onSuccess={() => {}}
+          onSuccess={refetch}
         />
       )}
 
@@ -1537,7 +1511,7 @@ export const Dashboard: React.FC = () => {
                   .flatMap(st => st.subSubtasks)
                   .find(sst => sst.subSubtask.id === showMilestone.subSubtaskId)?.milestones || []
           }
-          onDataChange={() => {}}
+          onDataChange={refetch}
         />
       )}
 
@@ -1548,7 +1522,7 @@ export const Dashboard: React.FC = () => {
           taskId={showEditTask.taskId}
           taskName={showEditTask.taskName}
           taskPriority={showEditTask.taskPriority}
-          onSuccess={() => {}}
+          onSuccess={refetch}
         />
       )}
 
@@ -1558,7 +1532,7 @@ export const Dashboard: React.FC = () => {
           onClose={() => setShowEditSubtask(null)}
           subtaskId={showEditSubtask.subtaskId}
           subtaskName={showEditSubtask.subtaskName}
-          onSuccess={() => {}}
+          onSuccess={refetch}
         />
       )}
 
@@ -1569,7 +1543,7 @@ export const Dashboard: React.FC = () => {
           subSubtaskId={showEditSubSubtask.subSubtaskId}
           subSubtaskName={showEditSubSubtask.subSubtaskName}
           parentSubtaskName={showEditSubSubtask.parentSubtaskName}
-          onSuccess={() => {}}
+          onSuccess={refetch}
         />
       )}
 
