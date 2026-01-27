@@ -28,9 +28,9 @@ export const Dashboard: React.FC = () => {
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(100);
 
-  const getCreatorName = (createdBy: string | null, usersList: User[]): string => {
+  const getCreatorName = (createdBy: string | null): string => {
     if (!createdBy) return 'Unknown';
-    const user = usersList.find(u => u.id === createdBy);
+    const user = users.find(u => u.id === createdBy);
     return user?.full_name || 'Unknown';
   };
 
