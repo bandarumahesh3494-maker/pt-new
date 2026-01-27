@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Plus, Calendar, UserPlus, Edit2, Trash2, Star, Eye, EyeOff, ChevronDown, ChevronRight, RefreshCw, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
+import { Plus, Calendar, UserPlus, Edit2, Trash2, Star, Eye, EyeOff, ChevronDown, ChevronRight, RefreshCw, ZoomIn, ZoomOut, Maximize2, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { logAction } from '../lib/actionLogger';
 import { useTrackerData } from '../hooks/useTrackerData';
@@ -82,6 +82,7 @@ export const Dashboard: React.FC = () => {
   const [dateRangeEnd, setDateRangeEnd] = useState<string>('');
   const [hideClosedTasks, setHideClosedTasks] = useState(false);
   const [selectedEngineer, setSelectedEngineer] = useState<string>('all');
+  const [selectedTask, setSelectedTask] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'category' | 'priority'>('category');
   const [viewMode, setViewMode] = useState<'day' | 'week' | 'month'>('week');
 
@@ -702,6 +703,32 @@ export const Dashboard: React.FC = () => {
                 </option>
               ))}
             </select>
+            <select
+              value={selectedTask}
+              onChange={(e) => setSelectedTask(e.target.value)}
+              className={`${colors.bgSecondary} border-0 ${colors.text} px-4 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 font-semibold shadow-md hover:shadow-lg transition-all cursor-pointer max-w-[250px]`}
+            >
+              <option value="all">All Tasks</option>
+              {groupedData.map(({ task }) => (
+                <option key={task.id} value={task.id}>
+                  {task.name.length > 30 ? task.name.substring(0, 30) + '...' : task.name}
+                </option>
+              ))}
+            </select>
+            {(selectedEngineer !== 'all' || selectedTask !== 'all' || hideClosedTasks) && (
+              <button
+                onClick={() => {
+                  setSelectedEngineer('all');
+                  setSelectedTask('all');
+                  setHideClosedTasks(false);
+                }}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all font-bold shadow-lg hover:shadow-xl transform hover:scale-105 bg-gray-600 hover:bg-gray-700 text-white"
+                title="Clear all filters"
+              >
+                <X className="w-4 h-4" />
+                Clear Filters
+              </button>
+            )}
             <button
               onClick={() => setHideClosedTasks(!hideClosedTasks)}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl transition-all font-bold shadow-lg hover:shadow-xl transform hover:scale-105 ${
@@ -775,6 +802,9 @@ export const Dashboard: React.FC = () => {
                       if (!hasMatchingEngineer) {
                         return false;
                       }
+                    }
+                    if (selectedTask !== 'all' && task.id !== selectedTask) {
+                      return false;
                     }
                     return true;
                   })
